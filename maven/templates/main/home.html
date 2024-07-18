@@ -1,0 +1,63 @@
+{% extends 'main/layout.html' %}
+
+{% block style %}
+<link href="{{ url_for('static', filename='css/cover.css') }}" rel="stylesheet">
+{% endblock style %}
+
+{% block content %}
+<body class="d-flex h-100 text-center text-white bg-dark">
+
+  <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <header class="mb-auto">
+      <div>
+        <h3 class="float-md-start mb-0">AcclaiMaven</h3>
+        <nav class="nav nav-masthead justify-content-center float-md-end">
+          <a class="nav-link active" aria-current="page" href="#">Home</a>
+          <a class="nav-link" href="#">Sponsors</a>
+          <a class="nav-link" href="#">Influencers</a>
+          <a class="nav-link" href="#">Login</a>
+        </nav>
+      </div>
+    </header>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    
+    
+
+    <div class="container h-100 d-flex align-items-centre justify-content-centre">
+      <div >
+        <main class="px-3">
+          <h1>Welcome to AcclaiMaven</h1>
+          <p class="lead">A platform to connect Sponsors and Influencers for mutual benefits. Sponsors can get their products/services advertised, and influencers can gain monetary benefits.</p>
+          <p class="lead">
+
+            <br>
+            <br>
+            <a href="{{ url_for('login')}}" class="btn btn-lg btn-secondary fw-bold border-white bg-white">Start Now!</a>
+            <br>
+            <br>
+
+          </p>
+        </main>
+      </div>
+    </div>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+
+    <footer class="footer mt-auto text-white-50">
+      <p>AcclaiMaven &copy; 2024. All rights reserved.</p>
+    </footer>
+
+  </div>
+{% endblock content %}
