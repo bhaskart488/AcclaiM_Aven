@@ -20,7 +20,6 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-
 class Influencer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
@@ -32,6 +31,12 @@ class Influencer(db.Model):
     category = db.Column(db.String(50))
     niche = db.Column(db.String(200))
     profile_picture = db.Column(db.String(100), default='default.jpg')
+    twitter_handle = db.Column(db.String(50))
+    twitter_followers = db.Column(db.Integer)
+    instagram_handle = db.Column(db.String(50))
+    instagram_followers = db.Column(db.Integer)
+    facebook_handle = db.Column(db.String(50))
+    facebook_followers = db.Column(db.Integer)
 
     def __repr__(self):
         return f'<Influencer {self.full_name}>'
@@ -44,11 +49,12 @@ class Sponsor(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone = db.Column(db.String(20))
     mobile = db.Column(db.String(20))
-    budget = db.Column(db.String(50))
     address = db.Column(db.String(200))
-    category = db.Column(db.String(50))
+    industry = db.Column(db.String(50))
     profile_picture = db.Column(db.String(100), default='default.jpg')
-
+    website = db.Column(db.String(50))
+    budget = db.Column(db.Integer)
+    
     def __repr__(self):
         return f'<Sponsor {self.full_name}>'
 

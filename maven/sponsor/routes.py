@@ -20,6 +20,17 @@ def profile(user_id):
     sponsor = Sponsor.query.filter_by(user_id=user_id).first_or_404()
 
     if form.validate_on_submit():
+        # Update Sponsor details
+        sponsor.full_name = form.full_name.data
+        sponsor.email = form.email.data
+        sponsor.phone = form.phone.data
+        sponsor.mobile = form.mobile.data
+        sponsor.address = form.address.data
+        sponsor.industry = form.industry.data
+
+        sponsor.website = form.website.data
+        sponsor.budget = form.budget.data
+        
         # Handle file upload
         picture_file = form.profile_picture.data
         if picture_file:
@@ -27,15 +38,6 @@ def profile(user_id):
             picture_file.save(os.path.join('maven/static/profile_pics', filename))
             sponsor.profile_picture = filename
 
-        # Update Sponsor details
-        sponsor.full_name = form.full_name.data
-        sponsor.email = form.email.data
-        sponsor.phone = form.phone.data
-        sponsor.mobile = form.mobile.data
-        sponsor.budget = form.budget.data
-        sponsor.address = form.address.data
-        sponsor.category = form.category.data
-        
         db.session.commit()
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('sponsor.profile', user_id=user_id))
@@ -47,9 +49,11 @@ def profile(user_id):
     form.mobile.data = sponsor.mobile
     form.budget.data = sponsor.budget
     form.address.data = sponsor.address
-    form.category.data = sponsor.category
+    form.industry.data = sponsor.industry
+    form.website.data = sponsor.website
+    form.budget.data = sponsor.budget
 
-    return render_template('sponsor/profile.html', form=form)
+    return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
 
 
 # # Example in maven/sponsor/routes.py

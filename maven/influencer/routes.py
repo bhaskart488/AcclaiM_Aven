@@ -14,22 +14,13 @@ def dashboard():
     return render_template('influencer/dashboard.html')
 
 
-
 @influencer.route('/profile/<int:user_id>', methods=['GET', 'POST'])
+@login_required
 def profile(user_id):
-    print(f"Current User: {current_user}")  # Add this line to check user details
-    form = InfluencerForm()
     influencer = Influencer.query.filter_by(user_id=user_id).first_or_404()
-
+    form = InfluencerForm()
+    
     if form.validate_on_submit():
-        # Handle file upload
-        picture_file = form.profile_picture.data
-        if picture_file:
-            filename = secure_filename(picture_file.filename)
-            picture_file.save(os.path.join('maven/static/profile_pics', filename))
-            influencer.profile_picture = filename
-
-        # Update Influencer details
         influencer.full_name = form.full_name.data
         influencer.email = form.email.data
         influencer.phone = form.phone.data
@@ -40,11 +31,25 @@ def profile(user_id):
         if form.niche.data:
             influencer.niche = ','.join(form.niche.data)
 
+        influencer.twitter_handle = form.twitter_handle.data
+        influencer.twitter_followers = form.twitter_followers.data
+        influencer.instagram_handle = form.instagram_handle.data
+        influencer.instagram_followers = form.instagram_followers.data
+        influencer.facebook_handle = form.facebook_handle.data
+        influencer.facebook_followers = form.facebook_followers.data
+
+        # Handle file upload
+        picture_file = form.profile_picture.data
+        if picture_file:
+            filename = secure_filename(picture_file.filename)
+            picture_file.save(os.path.join('maven/static/profile_pics', filename))
+            influencer.profile_picture = filename
+        
         db.session.commit()
-        flash('Profile updated successfully!', 'success')
+        flash('Your profile has been updated!', 'success')
         return redirect(url_for('influencer.profile', user_id=user_id))
 
-    # Load existing influencer details
+
     form.full_name.data = influencer.full_name
     form.email.data = influencer.email
     form.phone.data = influencer.phone
@@ -52,6 +57,12 @@ def profile(user_id):
     form.address.data = influencer.address
     form.category.data = influencer.category
     form.niche.data = influencer.niche.split(',') if influencer.niche else []
+    form.twitter_handle.data = influencer.twitter_handle
+    form.twitter_followers.data = influencer.twitter_followers
+    form.instagram_handle.data = influencer.instagram_handle
+    form.instagram_followers.data = influencer.instagram_followers
+    form.facebook_handle.data = influencer.facebook_handle
+    form.facebook_followers.data = influencer.facebook_followers
 
+    return render_template('influencer/profile.html', title='Profile', form=form, influencer=influencer)
 
-    return render_template('influencer/profile.html', form=form, influencer=influencer)

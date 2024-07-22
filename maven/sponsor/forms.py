@@ -15,14 +15,15 @@ def email_validator(form, email):
         raise ValidationError(str(e))
 
 class SponsorForm(FlaskForm):
-    full_name = StringField('Full Name', validators=[DataRequired()])
+    full_name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), email_validator])
     phone = StringField('Phone')
     mobile = StringField('Mobile')
-    budget = StringField('Budget')
     address = StringField('Address')
-    category = SelectField('Category', choices=[('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food')], validators=[DataRequired()])
+    industry = SelectField('Industry', choices=[('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food')], validators=[DataRequired()])
     profile_picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
+    website = StringField('Website')
+    budget = StringField('Budget')
     submit = SubmitField('Update Profile')
 
     def validate_username(self, username):
