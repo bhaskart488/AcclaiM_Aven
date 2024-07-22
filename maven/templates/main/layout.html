@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-bs-theme="dark" lang="en">
+<html data-bs-theme="light" lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -26,25 +26,40 @@
             <div class="collapse navbar-collapse" id="navcol-1">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.index') }}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Influencers</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Sponsors</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Pricing</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Contacts</a></li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.dashboard') }}">Influencers</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.dashboard') }}">Sponsors</a></li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.pricing') }}">Pricing</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.contacts') }}">Contacts</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Log in</a></li>
-                </ul><a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.signup') }}">Sign up</a>
+                    {% endif %}
+
+                    {% if current_user.is_authenticated %}
+                    </ul><a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.logout') }}">Logout</a>
+                    {% else %}
+                    </ul><a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.signup') }}">Sign up</a>
+                    {% endif %}
+
+
+                
             </div>
         </div>
     </nav><!-- End: Navbar Centered Links -->
     
-    {% with messages = get_flashed_messages(with_categories=true) %}
+
+    <div class="container" style="margin-top: 70px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-              {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">
-                  {{ message }}
-                </div>
-              {% endfor %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
             {% endif %}
-          {% endwith %}
+        {% endwith %}
+    </div>
 
     <!-- jinja block here -->
     {% block content %}
