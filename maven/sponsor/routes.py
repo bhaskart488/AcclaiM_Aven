@@ -1,5 +1,5 @@
 import os
-from flask import render_template, url_for, flash, redirect, request, Blueprint
+from flask import render_template, url_for, flash, redirect, request, Blueprint, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from maven import db
 from maven.models import Sponsor
@@ -13,6 +13,37 @@ sponsor = Blueprint('sponsor', __name__)
 @login_required
 def dashboard():
     return render_template('sponsor/dashboard.html')
+
+@sponsor.route('/sponsor/profile/<int:user_id>/delete', methods=['POST'])
+@login_required
+def delete_profile(user_id):
+    print("Delete profile route reached")
+
+    sponsor = Sponsor.query.filter_by(user_id=user_id).first_or_404()
+    if sponsor.user_id != current_user.id:
+        print("User does not have permission to delete this profile")
+        abort(403)
+
+    # Log the details of the sponsor being deleted
+    print(f"Deleting profile: {sponsor}")
+
+    
+    # Delete profile picture from the filesystem if it's not the default one
+    if sponsor.profile_picture != 'default.jpg':
+        picture_path = os.path.join('maven/static/profile_pics', sponsor.profile_picture)
+        if os.path.exists(picture_path):
+            os.remove(picture_path)
+            print(f"Profile picture {sponsor.profile_picture} deleted from filesystem")
+    
+    db.session.delete(sponsor)
+    db.session.commit()
+    print("Profile successfully deleted from database")
+    flash('Your profile has been deleted!', 'success')
+    return redirect(url_for('auth.logout'))
+
+
+
+
 
 @sponsor.route('/sponsor/profile/<int:user_id>', methods=['GET', 'POST'])
 @login_required

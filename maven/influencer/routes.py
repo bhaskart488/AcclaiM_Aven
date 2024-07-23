@@ -39,7 +39,8 @@ def delete_profile(user_id):
     db.session.commit()
     print("Profile successfully deleted from database")
     flash('Your profile has been deleted!', 'success')
-    return redirect(url_for('main.index'))
+    return redirect(url_for('auth.logout'))
+
 
 
 
