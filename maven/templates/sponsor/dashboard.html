@@ -11,7 +11,7 @@
                 <div class="col-md-6 text-center text-md-start d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-md-start align-items-md-center justify-content-xl-center">
                     <div style="max-width: 350px;">
                         <h1 class="display-6 fw-bold mb-4">Create and track campaigns on one&nbsp;<span class="underline">platform</span>.</h1>
-                        <p class="my-4"><span style="color: rgba(18, 22, 67, 0.75);">Amplify your brand's reach with authentic influencer partnerships. Create and manage campaigns effortlessly. Our platform helps you find the perfect influencers to advertise your product or service.</span></p><a class="btn btn-primary btn-lg me-2" role="button" href="#">Sign Up</a><a class="btn btn-light btn-lg" role="button" href="#">Account</a>
+                        <p class="my-4"><span style="color: rgba(18, 22, 67, 0.75);">Amplify your brand's reach with authentic influencer partnerships. Create and manage campaigns effortlessly. Our platform helps you find the perfect influencers to advertise your product or service.</span></p><a class="btn btn-primary btn-lg me-2" role="button" href="{{ url_for('auth.signup') }}">Sign Up</a><a class="btn btn-light btn-lg" role="button" href="{{ url_for('sponsor.profile', user_id=current_user.id) }}">Profile</a>
                     </div>
                 </div>
                 <div class="col-md-6">

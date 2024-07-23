@@ -14,10 +14,11 @@ sponsor = Blueprint('sponsor', __name__)
 def dashboard():
     return render_template('sponsor/dashboard.html')
 
-@sponsor.route('/profile/<int:user_id>', methods=['GET', 'POST'])
+@sponsor.route('/sponsor/profile/<int:user_id>', methods=['GET', 'POST'])
+@login_required
 def profile(user_id):
-    form = SponsorForm()
     sponsor = Sponsor.query.filter_by(user_id=user_id).first_or_404()
+    form = SponsorForm()
 
     if form.validate_on_submit():
         # Update Sponsor details
@@ -47,7 +48,6 @@ def profile(user_id):
     form.email.data = sponsor.email
     form.phone.data = sponsor.phone
     form.mobile.data = sponsor.mobile
-    form.budget.data = sponsor.budget
     form.address.data = sponsor.address
     form.industry.data = sponsor.industry
     form.website.data = sponsor.website
