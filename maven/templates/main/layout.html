@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-bs-theme="light" lang="en">
+<html data-bs-theme="dark" lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -25,32 +25,41 @@
 </head>
 
 <body>
+
     <!-- Start: Navbar Centered Links -->
-    <nav class="navbar navbar-expand-md fixed-top navbar-shrink py-3" id="mainNav">
-        <div class="container"><a class="navbar-brand d-flex align-items-center" href="/"><span>AcclaiMaven</span></a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navcol-1">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.index') }}">Home</a></li>
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.dashboard') }}">Influencers</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.dashboard') }}">Sponsors</a></li>
-                    {% else %}
+<nav class="navbar navbar-expand-md fixed-top navbar-shrink py-3" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/"><span>AcclaiMaven</span></a>
+        <button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navcol-1">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.index') }}">Home</a></li>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'influencer' %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.dashboard') }}">Dashboard</a></li>
+                        <!-- Add more influencer-specific links here -->
+                    {% elif current_user.role == 'sponsor' %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.dashboard') }}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.manage_campaigns') }}">Manage Campaigns</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.create_campaign') }}">Create Campaign</a></li>
+                        <!-- Add more sponsor-specific links here -->
+                    {% endif %}
+                {% else %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.pricing') }}">Pricing</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.contacts') }}">Contacts</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Log in</a></li>
-                    {% endif %}
-
-                    {% if current_user.is_authenticated %}
-                    </ul><a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.logout') }}">Logout</a>
-                    {% else %}
-                    </ul><a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.signup') }}">Sign up</a>
-                    {% endif %}
-
-
-                
-            </div>
+                {% endif %}
+            </ul>
+            {% if current_user.is_authenticated %}
+                <a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.logout') }}">Logout</a>
+            {% else %}
+                <a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.signup') }}">Sign up</a>
+            {% endif %}
         </div>
-    </nav><!-- End: Navbar Centered Links -->
+    </div>
+</nav>
+<!-- End: Navbar Centered Links -->
+
     
 
     <div class="container" style="margin-top: 70px;">

@@ -1,5 +1,7 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from marshmallow import fields
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from maven import db, bcrypt
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -19,6 +21,7 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
 
 class Influencer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -59,21 +62,50 @@ class Sponsor(db.Model):
         return f'<Sponsor {self.full_name}>'
 
 
-
-
-
-class Campaign(db.Model, UserMixin):
+class Campaign(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    budget = db.Column(db.Integer, nullable=False)
+    visibility = db.Column(db.String(10), nullable=False)  # 'public' or 'private'
+    goals = db.Column(db.String(200))
+    
     sponsor_id = db.Column(db.Integer, db.ForeignKey('sponsor.id'), nullable=False)
-    budget = db.Column(db.Float, nullable=False)
-    start_date = db.Column(db.DateTime, nullable=False)
-    end_date = db.Column(db.DateTime, nullable=False)
+    sponsor = db.relationship('Sponsor', backref=db.backref('campaigns', lazy=True))
+    
+    ad_requests = db.relationship('AdRequest', backref='campaign', lazy=True)
+    
+    def __repr__(self):
+        return f'<Campaign {self.name}>'
 
-class Ad(db.Model, UserMixin):
+class AdRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
     campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    platform = db.Column(db.String(80), nullable=False)
+    influencer_id = db.Column(db.Integer, db.ForeignKey('influencer.id'), nullable=False)
+    messages = db.Column(db.Text)
+    requirements = db.Column(db.Text)
+    payment_amount = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(20), nullable=False)  # 'Pending', 'Accepted', 'Rejected'
+    
+    # campaign = db.relationship('Campaign', back_populates='ad_requests')
 
+    def __repr__(self):
+        return f'<AdRequest {self.id}>' 
+
+class CampaignSchema(SQLAlchemyAutoSchema):
+    start_date = fields.DateTime(format='%Y-%m-%d')  # Ensure proper format
+    end_date = fields.DateTime(format='%Y-%m-%d')    # Ensure proper format
+
+    class Meta:
+        model = Campaign
+        include_relationships = True
+        load_instance = True
+
+campaign_schema = CampaignSchema()
+campaigns_schema = CampaignSchema(many=True)
+
+
+
+    

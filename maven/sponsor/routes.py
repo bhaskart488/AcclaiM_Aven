@@ -2,17 +2,18 @@ import os
 from flask import render_template, url_for, flash, redirect, request, Blueprint, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from maven import db
-from maven.models import Sponsor
-from maven.sponsor.forms import SponsorForm
+from maven.models import Sponsor, Campaign
+from maven.sponsor.forms import SponsorForm, CampaignForm
 from werkzeug.utils import secure_filename
-
+import requests
 
 sponsor = Blueprint('sponsor', __name__)
+
 
 @sponsor.route('/sponsor-dashboard')
 @login_required
 def dashboard():
-    return render_template('sponsor/dashboard.html')
+    return render_template('sponsor/dashboard.html', title='Sponsor')
 
 @sponsor.route('/sponsor/profile/<int:user_id>/delete', methods=['POST'])
 @login_required
@@ -40,9 +41,6 @@ def delete_profile(user_id):
     print("Profile successfully deleted from database")
     flash('Your profile has been deleted!', 'success')
     return redirect(url_for('auth.logout'))
-
-
-
 
 
 @sponsor.route('/sponsor/profile/<int:user_id>', methods=['GET', 'POST'])
@@ -87,19 +85,121 @@ def profile(user_id):
     return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
 
 
-# # Example in maven/sponsor/routes.py
-# @auth.route('/campaigns', methods=['GET', 'POST'])
-# @login_required
-# def manage_campaigns():
-#     if request.method == 'POST':
-#         data = {
-#             'name': request.form.get('name'),
-#             'description': request.form.get('description')
-#         }
-#         response = requests.post(f'{API_URL}/campaign', json=data)
-#         if response.status_code == 201:
-#             flash('Campaign created successfully', 'success')
-#         else:
-#             flash('Failed to create campaign', 'danger')
-#     campaigns = requests.get(f'{API_URL}/campaign').json()
-#     return render_template('sponsor/campaigns.html', campaigns=campaigns)
+API_URL = 'http://localhost:5000/api'  # Replace with the actual API URL
+
+
+# Campaign Management Routes
+@sponsor.route('/campaigns', methods=['GET', 'POST'])
+@login_required
+def manage_campaigns():
+    form=CampaignForm()
+    if request.method == 'POST':
+        data = {
+            'name': request.form.get('name'),
+            'description': request.form.get('description'),
+            'start_date': request.form.get('start_date'),
+            'end_date': request.form.get('end_date'),
+            'budget': request.form.get('budget'),
+            'visibility': request.form.get('visibility'),
+            'goals': request.form.get('goals'),
+            'sponsor_id': current_user.id  # Use the current user's ID
+        }
+        response = requests.post(f'{API_URL}/campaigns', json=data)
+        if response.status_code == 201:
+            flash('Campaign created successfully', 'success')
+        else:
+            flash('Failed to create campaign', 'danger')
+        return redirect(url_for('sponsor.manage_campaigns'))  # Redirect to avoid form resubmission
+    
+    response = requests.get(f'{API_URL}/campaigns')
+    if response.status_code == 200:
+        campaigns = response.json()
+    else:
+        campaigns = []
+        flash('Failed to retrieve campaigns', 'danger')
+    
+    return render_template('sponsor/campaigns.html', campaigns=campaigns, title='Campaigns', form=form)
+
+
+@sponsor.route('/campaigns/create', methods=['GET', 'POST'])
+@login_required
+def create_campaign():
+    form = CampaignForm()
+    if form.validate_on_submit():
+        data = {
+            'name': form.name.data,
+            'description': form.description.data,
+            'start_date': form.start_date.data.isoformat(),
+            'end_date': form.end_date.data.isoformat(),
+            'budget': form.budget.data,
+            'visibility': form.visibility.data,
+            'goals': form.goals.data,
+            'sponsor_id': current_user.id
+        }
+        response = requests.post(f'{API_URL}/campaigns', json=data)
+        if response.status_code == 201:
+            flash('Campaign created successfully', 'success')
+            return redirect(url_for('sponsor.manage_campaigns'))
+        else:
+            flash('Failed to create campaign', 'danger')
+    
+    return render_template('sponsor/create_campaign.html', title='Create Campaign', form=form)
+
+
+@sponsor.route('/campaigns/<int:campaign_id>/edit', methods=['GET', 'POST', 'PUT'])
+@login_required
+def edit_campaign(campaign_id):
+
+    campaign_ins = Campaign.query.get_or_404(campaign_id)
+    form = CampaignForm(obj=campaign_ins)
+    response = requests.get(f'{API_URL}/campaign/{campaign_id}')
+    if response.status_code == 200:
+        campaign = response.json()
+    else:
+        flash('Failed to retrieve campaign details', 'danger')
+        return redirect(url_for('sponsor.manage_campaigns'))
+
+
+    if form.validate_on_submit():
+        data = {
+            'name': form.name.data,
+            'description': form.description.data,
+            'start_date': form.start_date.data.isoformat(),
+            'end_date': form.end_date.data.isoformat(),
+            'budget': form.budget.data,
+            'visibility': form.visibility.data,
+            'goals': form.goals.data,
+            'sponsor_id': current_user.id
+        }
+        response = requests.put(f'{API_URL}/campaign/{campaign_id}', json=data)
+        print(f"Type of campaign_ins: {type(campaign_ins)}")
+        print(f"Type of form: {type(form)}")
+
+        if response.status_code == 200:
+            flash('Campaign updated successfully', 'success')
+            form.populate_obj(campaign_ins)
+            return redirect(url_for('sponsor.manage_campaigns'))
+        else:
+            flash('Failed to update campaign', 'danger')
+    
+    return render_template('sponsor/edit_campaign.html', title='Edit Campaign', form=form, campaign=campaign)
+
+
+
+@sponsor.route('/campaigns/<int:campaign_id>/delete', methods=['POST'])
+@login_required
+def delete_campaign(campaign_id):
+    print(f"Delete request received for campaign ID: {campaign_id}")
+    print(f"Request form data: {request.form}")
+
+    if request.form.get('_method') == 'DELETE':
+        response = requests.delete(f'{API_URL}/campaign/{campaign_id}')
+        if response.status_code == 200:
+            flash('Campaign deleted successfully', 'success')
+        else:
+            print(f"Error from API: {response.status_code} - {response.text}")
+            flash('Failed to delete campaign', 'danger')
+    else:
+        flash('Invalid request method', 'danger')
+    
+    return redirect(url_for('sponsor.manage_campaigns'))

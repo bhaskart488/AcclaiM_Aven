@@ -1,0 +1,110 @@
+{% extends 'main/layout.html' %}
+
+{% block script %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true
+            });
+        });
+    </script>
+{% endblock script %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Edit Campaign</h1>
+        <form method="POST" action="{{ url_for('sponsor.edit_campaign', campaign_id=campaign.id) }}">
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-3">
+                {{ form.name.label(class="form-label") }}
+                {{ form.name(class="form-control", placeholder="Enter campaign name") }}
+                {% if form.name.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {% for error in form.name.errors %}
+                            <span>{{ error }}</span><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control", placeholder="Enter campaign description") }}
+                {% if form.description.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {% for error in form.description.errors %}
+                            <span>{{ error }}</span><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.start_date.label(class="form-label") }}
+                {{ form.start_date(class="form-control datepicker", placeholder="Select start date") }}
+                {% if form.start_date.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {% for error in form.start_date.errors %}
+                            <span>{{ error }}</span><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.end_date.label(class="form-label") }}
+                {{ form.end_date(class="form-control datepicker", placeholder="Select end date") }}
+                {% if form.end_date.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {% for error in form.end_date.errors %}
+                            <span>{{ error }}</span><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.budget.label(class="form-label") }}
+                {{ form.budget(class="form-control", placeholder="Enter campaign budget") }}
+                {% if form.budget.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {% for error in form.budget.errors %}
+                            <span>{{ error }}</span><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.visibility.label(class="form-label") }}
+                {{ form.visibility(class="form-select") }}
+                {% if form.visibility.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {% for error in form.visibility.errors %}
+                            <span>{{ error }}</span><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.goals.label(class="form-label") }}
+                {{ form.goals(class="form-control", placeholder="Enter campaign goals") }}
+                {% if form.goals.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {% for error in form.goals.errors %}
+                            <span>{{ error }}</span><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ url_for('sponsor.manage_campaigns') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+{% endblock content %}
