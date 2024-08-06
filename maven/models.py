@@ -80,19 +80,19 @@ class Campaign(db.Model):
     def __repr__(self):
         return f'<Campaign {self.name}>'
 
+
 class AdRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'), nullable=False)
-    influencer_id = db.Column(db.Integer, db.ForeignKey('influencer.id'), nullable=False)
-    messages = db.Column(db.Text)
-    requirements = db.Column(db.Text)
-    payment_amount = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.String(20), nullable=False)  # 'Pending', 'Accepted', 'Rejected'
-    
-    # campaign = db.relationship('Campaign', back_populates='ad_requests')
+    influencer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='Pending')
+    offer_amount = db.Column(db.Float, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return f'<AdRequest {self.id}>' 
+        return f"AdRequest('{self.campaign_id}', '{self.influencer_id}', '{self.status}')"
+
 
 class CampaignSchema(SQLAlchemyAutoSchema):
     start_date = fields.DateTime(format='%Y-%m-%d')  # Ensure proper format

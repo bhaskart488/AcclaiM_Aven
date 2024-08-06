@@ -2,8 +2,9 @@ import os
 from flask import render_template, url_for, flash, redirect, request, Blueprint, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from maven import db
-from maven.models import Sponsor, Campaign
+from maven.models import User, Sponsor, Campaign, AdRequest
 from maven.sponsor.forms import SponsorForm, CampaignForm
+# AdRequestForm
 from werkzeug.utils import secure_filename
 import requests
 
@@ -28,6 +29,8 @@ def delete_profile(user_id):
     # Log the details of the sponsor being deleted
     print(f"Deleting profile: {sponsor}")
 
+    # Fetch the user object associated with the influencer
+    user = User.query.get_or_404(user_id)
     
     # Delete profile picture from the filesystem if it's not the default one
     if sponsor.profile_picture != 'default.jpg':
@@ -38,8 +41,14 @@ def delete_profile(user_id):
     
     db.session.delete(sponsor)
     db.session.commit()
-    print("Profile successfully deleted from database")
-    flash('Your profile has been deleted!', 'success')
+    print("Sponsor Profile successfully deleted from database")
+
+    # Delete the user
+    db.session.delete(user)
+    db.session.commit()
+    print("User account successfully deleted from database")
+
+    flash('Your profile and account have been deleted!', 'success')
     return redirect(url_for('auth.logout'))
 
 
@@ -85,10 +94,12 @@ def profile(user_id):
     return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
 
 
+
 API_URL = 'http://localhost:5000/api'  # Replace with the actual API URL
 
 
 # Campaign Management Routes
+
 @sponsor.route('/campaigns', methods=['GET', 'POST'])
 @login_required
 def manage_campaigns():
@@ -203,3 +214,29 @@ def delete_campaign(campaign_id):
         flash('Invalid request method', 'danger')
     
     return redirect(url_for('sponsor.manage_campaigns'))
+
+
+
+
+# Ad-request routes
+
+# -----------------
+
+# @sponsor.route('/campaign/<int:campaign_id>/ad_requests', methods=['GET', 'POST'])
+# @login_required
+# def ad_requests(campaign_id):
+#     campaign = Campaign.query.get_or_404(campaign_id)
+#     ad_requests = AdRequest.query.filter_by(campaign_id=campaign.id).all()
+#     form = AdRequestForm()
+#     if form.validate_on_submit():
+#         ad_request = AdRequest(
+#             campaign_id=campaign.id,
+#             influencer_id=form.influencer_id.data,
+#             status=form.status.data,
+#             offer_amount=form.offer_amount.data
+#         )
+#         db.session.add(ad_request)
+#         db.session.commit()
+#         flash('Ad Request created!', 'success')
+#         return redirect(url_for('sponsor.ad_requests', campaign_id=campaign.id))
+#     return render_template('sponsor/manage_requests.html', ad_requests=ad_requests, form=form, campaign=campaign)

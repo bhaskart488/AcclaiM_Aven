@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, SelectField, SelectMultipleField, EmailField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, InputRequired
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, SelectField, SelectMultipleField, EmailField, IntegerField, TextAreaField, DecimalField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, InputRequired, NumberRange
 from flask_login import current_user
 from maven.models import User
 from email_validator import validate_email, EmailNotValidError
@@ -31,3 +31,13 @@ class InfluencerForm(FlaskForm):
     facebook_handle = StringField('Facebook Handle')
     facebook_followers = StringField('Facebook Followers')
     submit = SubmitField('Update Profile')
+
+
+# class AdRequestForm(FlaskForm):
+#     campaign_id = IntegerField('Campaign ID', validators=[DataRequired()])
+#     influencer_id = IntegerField('Influencer ID', validators=[DataRequired()])
+#     messages = TextAreaField('Messages', validators=[DataRequired()])
+#     requirements = TextAreaField('Requirements', validators=[DataRequired()])
+#     payment_amount = DecimalField('Payment Amount', validators=[DataRequired(), NumberRange(min=0)])
+#     status = SelectField('Status', choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected')], validators=[DataRequired()])
+#     submit = SubmitField('Submit')

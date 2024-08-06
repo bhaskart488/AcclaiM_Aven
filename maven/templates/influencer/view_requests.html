@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>My Ad Requests</h2>
+<ul>
+    {% for ad_request in ad_requests %}
+    <li>
+        {{ ad_request.campaign.name }} - {{ ad_request.status }} - {{ ad_request.offer_amount }}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

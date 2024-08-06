@@ -1,6 +1,6 @@
 from flask_restful import Resource, Api, reqparse, fields, marshal_with
 from maven import db
-from maven.models import User, Sponsor, Influencer, Campaign, campaign_schema, campaigns_schema
+from maven.models import User, Sponsor, Influencer, Campaign, campaign_schema, campaigns_schema, AdRequest
 from flask_login import login_user
 from flask import Blueprint, jsonify, request
 from datetime import datetime
@@ -237,3 +237,67 @@ class CampaignResource(Resource):
 api.add_resource(CampaignResource, '/campaign/<int:campaign_id>', '/campaigns')
 
 
+
+#api resourcer for ad-requests
+
+
+# ad_request_fields = {
+#     'id': fields.Integer,
+#     'campaign_id': fields.Integer,
+#     'influencer_id': fields.Integer,
+#     'status': fields.String,
+#     'offer_amount': fields.Float,
+#     'created_at': fields.String,
+#     'updated_at': fields.String,
+# }
+
+# ad_request_parser = reqparse.RequestParser()
+# ad_request_parser.add_argument('campaign_id', type=int, required=True)
+# ad_request_parser.add_argument('influencer_id', type=int, required=True)
+# ad_request_parser.add_argument('status', type=str, required=True)
+# ad_request_parser.add_argument('offer_amount', type=float, required=True)
+
+# class AdRequestResource(Resource):
+#     @marshal_with(ad_request_fields)
+#     def get(self, ad_request_id):
+#         ad_request = AdRequest.query.get_or_404(ad_request_id)
+#         return ad_request
+
+#     @marshal_with(ad_request_fields)
+#     def put(self, ad_request_id):
+#         args = ad_request_parser.parse_args()
+#         ad_request = AdRequest.query.get_or_404(ad_request_id)
+#         ad_request.campaign_id = args['campaign_id']
+#         ad_request.influencer_id = args['influencer_id']
+#         ad_request.status = args['status']
+#         ad_request.offer_amount = args['offer_amount']
+#         db.session.commit()
+#         return ad_request
+
+#     def delete(self, ad_request_id):
+#         ad_request = AdRequest.query.get_or_404(ad_request_id)
+#         db.session.delete(ad_request)
+#         db.session.commit()
+#         return '', 204
+
+# class AdRequestListResource(Resource):
+#     @marshal_with(ad_request_fields)
+#     def get(self):
+#         ad_requests = AdRequest.query.all()
+#         return ad_requests
+
+#     @marshal_with(ad_request_fields)
+#     def post(self):
+#         args = ad_request_parser.parse_args()
+#         ad_request = AdRequest(
+#             campaign_id=args['campaign_id'],
+#             influencer_id=args['influencer_id'],
+#             status=args['status'],
+#             offer_amount=args['offer_amount']
+#         )
+#         db.session.add(ad_request)
+#         db.session.commit()
+#         return ad_request, 201
+
+# api.add_resource(AdRequestResource, '/ad_request/<int:ad_request_id>')
+# api.add_resource(AdRequestListResource, '/ad_requests')

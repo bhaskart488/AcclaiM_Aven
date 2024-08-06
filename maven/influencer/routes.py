@@ -2,8 +2,9 @@ import os
 from flask import render_template, url_for, flash, redirect, request, Blueprint, abort
 from flask_login import login_required, current_user
 from maven import db
-from maven.models import Influencer
+from maven.models import User, Influencer, AdRequest
 from maven.influencer.forms import InfluencerForm
+# , AdRequestForm
 from werkzeug.utils import secure_filename
 
 influencer = Blueprint('influencer', __name__)
@@ -27,7 +28,9 @@ def delete_profile(user_id):
     # Log the details of the influencer being deleted
     print(f"Deleting profile: {influencer}")
 
-    
+    # Fetch the user object associated with the influencer
+    user = User.query.get_or_404(user_id)
+
     # Delete profile picture from the filesystem if it's not the default one
     if influencer.profile_picture != 'default.jpg':
         picture_path = os.path.join('maven/static/profile_pics', influencer.profile_picture)
@@ -35,12 +38,18 @@ def delete_profile(user_id):
             os.remove(picture_path)
             print(f"Profile picture {influencer.profile_picture} deleted from filesystem")
     
+    # Delete the influencer profile
     db.session.delete(influencer)
     db.session.commit()
-    print("Profile successfully deleted from database")
-    flash('Your profile has been deleted!', 'success')
-    return redirect(url_for('auth.logout'))
+    print("Influencer profile successfully deleted from database")
 
+    # Delete the user
+    db.session.delete(user)
+    db.session.commit()
+    print("User account successfully deleted from database")
+
+    flash('Your profile and account have been deleted!', 'success')
+    return redirect(url_for('auth.logout'))
 
 
 
@@ -50,10 +59,13 @@ def profile(user_id):
     if request.method == 'POST':
         print("Profile route received a POST request")
 
-    influencer = Influencer.query.filter_by(user_id=user_id).first_or_404()
     form = InfluencerForm()
+    influencer = Influencer.query.filter_by(user_id=user_id).first_or_404()
+    
     
     if form.validate_on_submit():
+        print("Profile route received validate request")
+
         influencer.full_name = form.full_name.data
         influencer.email = form.email.data
         influencer.phone = form.phone.data
@@ -71,16 +83,18 @@ def profile(user_id):
         influencer.facebook_handle = form.facebook_handle.data
         influencer.facebook_followers = form.facebook_followers.data
 
-        # Handle file upload
-        picture_file = form.profile_picture.data
-        if picture_file:
+        if form.profile_picture.data:
+            picture_file = form.profile_picture.data
             filename = secure_filename(picture_file.filename)
-            picture_file.save(os.path.join('maven/static/profile_pics', filename))
+            picture_path = os.path.join('maven/static/profile_pics', filename)
+            picture_file.save(picture_path)
             influencer.profile_picture = filename
         
         db.session.commit()
         flash('Your profile has been updated!', 'success')
         return redirect(url_for('influencer.profile', user_id=user_id))
+    else:
+        print(form.errors)
 
 
     form.full_name.data = influencer.full_name
@@ -101,3 +115,13 @@ def profile(user_id):
 
 
 
+#----------------------
+# Ad-request routes
+
+
+
+# @influencer.route('/ad_requests', methods=['GET'])
+# @login_required
+# def view_requests():
+#     ad_requests = AdRequest.query.filter_by(influencer_id=current_user.id).all()
+#     return render_template('influencer/view_requests.html', ad_requests=ad_requests)

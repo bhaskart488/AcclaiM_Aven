@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, RadioField, SelectField, SelectMultipleField, EmailField, TextAreaField, IntegerField, DateField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, DecimalField, TextAreaField, IntegerField, DateField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, InputRequired, NumberRange
 from flask_login import current_user
 from maven.models import User
@@ -21,7 +21,7 @@ class SponsorForm(FlaskForm):
     mobile = StringField('Mobile')
     address = StringField('Address')
     industry = SelectField('Industry', choices=[('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food')], validators=[DataRequired()])
-    profile_picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
+    profile_picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
     website = StringField('Website')
     budget = StringField('Budget')
     submit = SubmitField('Update Profile')
@@ -41,7 +41,6 @@ class SponsorForm(FlaskForm):
             raise ValidationError('That email is taken. Please choose a different one.')
 
 
-
 class CampaignForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
@@ -50,3 +49,13 @@ class CampaignForm(FlaskForm):
     budget = IntegerField('Budget', validators=[DataRequired()])
     visibility = SelectField('Visibility', choices=[('public', 'Public'), ('private', 'Private')], validators=[DataRequired()])
     goals = StringField('Goals')
+
+
+# class AdRequestForm(FlaskForm):
+#     campaign_id = IntegerField('Campaign ID', validators=[DataRequired()])
+#     influencer_id = IntegerField('Influencer ID', validators=[DataRequired()])
+#     messages = TextAreaField('Messages', validators=[DataRequired()])
+#     requirements = TextAreaField('Requirements', validators=[DataRequired()])
+#     payment_amount = DecimalField('Payment Amount', validators=[DataRequired(), NumberRange(min=0)])
+#     status = SelectField('Status', choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected')], validators=[DataRequired()])
+#     submit = SubmitField('Submit')
