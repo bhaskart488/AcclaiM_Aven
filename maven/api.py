@@ -1,9 +1,9 @@
 from flask_restful import Resource, Api, reqparse, fields, marshal_with
 from maven import db
-from maven.models import User, Sponsor, Influencer, Campaign, campaign_schema, campaigns_schema, AdRequest
+from maven.models import User, Sponsor, Influencer, Campaign, campaign_schema, campaigns_schema, AdRequest, adRequest_schema, adRequests_schema
 from flask_login import login_user
 from flask import Blueprint, jsonify, request
-from datetime import datetime
+from datetime import datetime, timezone
 # from marshmallow import fields
 
 
@@ -60,7 +60,12 @@ api.add_resource(Register, '/register')
 api.add_resource(Login, '/login')
 
 
-# Resources for campaigns
+# -----------------------------
+
+# API Resources for campaigns
+
+# -----------------------------
+
 
 # Define the fields for marshalling
 campaign_fields = {
@@ -101,8 +106,8 @@ class CampaignResource(Resource):
         parser.add_argument('sponsor_id', type=int, required=True, help='Sponsor ID is required')
         
         args = parser.parse_args()
-        # Convert date strings to date objects
 
+        # Convert date strings to date objects
         start_date_str = args.get('start_date')
         end_date_str = args.get('end_date')
 
@@ -176,52 +181,6 @@ class CampaignResource(Resource):
 
         return {'message': 'Campaign updated successfully'}, 200
 
-        # parser = reqparse.RequestParser()
-        # parser.add_argument('name', type=str, required=True, help="Name cannot be blank")
-        # parser.add_argument('description', type=str, required=True, help="Description cannot be blank")
-        # parser.add_argument('start_date', type=str, required=True, help="Start date cannot be blank")
-        # parser.add_argument('end_date', type=str, required=True, help="End date cannot be blank")
-        # parser.add_argument('budget', type=int, required=True, help="Budget cannot be blank")
-        # parser.add_argument('visibility', type=str, required=True, help="Visibility cannot be blank")
-        # parser.add_argument('goals', type=str)
-        # parser.add_argument('sponsor_id', type=int, required=True, help="Sponsor ID cannot be blank")
-        # args = parser.parse_args()
-
-        # start_date_str = args.get('start_date')
-        # end_date_str = args.get('end_date')
-
-        # # Initialize start_date and end_date with default values
-        # start_date = None
-        # end_date = None
-
-        # if start_date_str and end_date_str:
-        #     try:
-        #         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        #         end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        #     except ValueError:
-        #         return {'message': 'Invalid date format, expected YYYY-MM-DD'}, 400
-
-        # campaign = Campaign.query.get(campaign_id)
-        # if campaign:
-        #     campaign.name = args['name']
-        #     campaign.description = args['description']
-        #     campaign.start_date = args['start_date']
-        #     campaign.end_date = args['end_date']
-        #     campaign.budget = args['budget']
-        #     campaign.visibility = args['visibility']
-        #     campaign.goals = args['goals']
-        #     campaign.sponsor_id = args['sponsor_id']
-
-        #     # Convert date strings to date objects
-        #     try:
-        #         start_date = datetime.strptime(args['start_date'], '%Y-%m-%d').date()
-        #         end_date = datetime.strptime(args['end_date'], '%Y-%m-%d').date()
-        #     except ValueError:
-        #         return {'message': 'Invalid date format, expected YYYY-MM-DD'}, 400
-
-        #     db.session.commit()
-        #     return campaign, 200
-        # return {'message': 'Campaign not found'}, 404
 
     def delete(self, campaign_id):
         print('delete api called!!!')
@@ -238,66 +197,92 @@ api.add_resource(CampaignResource, '/campaign/<int:campaign_id>', '/campaigns')
 
 
 
-#api resourcer for ad-requests
+# -----------------------------
+
+# api resourcer for ad-requests
+
+# -----------------------------
 
 
-# ad_request_fields = {
-#     'id': fields.Integer,
-#     'campaign_id': fields.Integer,
-#     'influencer_id': fields.Integer,
-#     'status': fields.String,
-#     'offer_amount': fields.Float,
-#     'created_at': fields.String,
-#     'updated_at': fields.String,
-# }
+# Define fields for marshalling AdRequests
+ad_request_fields = {
+    'id': fields.Integer,
+    'campaign_id': fields.Integer,
+    'influencer_id': fields.Integer,
+    'messages': fields.String,
+    'requirements': fields.String,
+    'status': fields.String,
+    'offer_amount': fields.Float,
+    'created_at': fields.String,
+    'updated_at': fields.String,
+}
 
-# ad_request_parser = reqparse.RequestParser()
-# ad_request_parser.add_argument('campaign_id', type=int, required=True)
-# ad_request_parser.add_argument('influencer_id', type=int, required=True)
-# ad_request_parser.add_argument('status', type=str, required=True)
-# ad_request_parser.add_argument('offer_amount', type=float, required=True)
+class AdRequestResource(Resource):
+    @marshal_with(ad_request_fields)
+    def get(self, ad_request_id=None):
+        if ad_request_id:
+            ad_request = AdRequest.query.get(ad_request_id)
+            if ad_request:
+                return ad_request, 200
+            return {'message': 'AdRequest not found'}, 404
+        ad_requests = AdRequest.query.all()
+        return adRequests_schema.dump(ad_requests), 200
 
-# class AdRequestResource(Resource):
-#     @marshal_with(ad_request_fields)
-#     def get(self, ad_request_id):
-#         ad_request = AdRequest.query.get_or_404(ad_request_id)
-#         return ad_request
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('campaign_id', type=int, required=True, help='Campaign ID is required')
+        parser.add_argument('influencer_id', type=int, required=True, help='Influencer ID is required')
+        parser.add_argument('messages', type=str, required=True, help='Message(s) is required')
+        parser.add_argument('requirements', type=str, required=True, help='Requirements are required')
+        parser.add_argument('status', type=str, required=True, help='Status is required')
+        parser.add_argument('offer_amount', type=float, required=True, help='Offer is required')
 
-#     @marshal_with(ad_request_fields)
-#     def put(self, ad_request_id):
-#         args = ad_request_parser.parse_args()
-#         ad_request = AdRequest.query.get_or_404(ad_request_id)
-#         ad_request.campaign_id = args['campaign_id']
-#         ad_request.influencer_id = args['influencer_id']
-#         ad_request.status = args['status']
-#         ad_request.offer_amount = args['offer_amount']
-#         db.session.commit()
-#         return ad_request
+        args = parser.parse_args()
+        
+        ad_request = AdRequest(
+            campaign_id=args['campaign_id'],
+            influencer_id=args['influencer_id'],
+            messages=args['messages'],
+            requirements=args['requirements'],
+            status=args['status'],
+            offer_amount=args['offer_amount'],
+        )
+        db.session.add(ad_request)
+        try:
+            db.session.commit()
+            return {'message': 'AdRequest created successfully'}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {'message': str(e)}, 500
 
-#     def delete(self, ad_request_id):
-#         ad_request = AdRequest.query.get_or_404(ad_request_id)
-#         db.session.delete(ad_request)
-#         db.session.commit()
-#         return '', 204
+    @marshal_with(ad_request_fields)
+    def put(self, ad_request_id):
+        ad_request = AdRequest.query.get(ad_request_id)
+        if not ad_request:
+            return {'message': 'AdRequest not found'}, 404
+        
+        data = request.get_json()
+        ad_request.campaign_id = data['campaign_id']
+        ad_request.influencer_id = data['influencer_id']
+        ad_request.messages = data['messages']
+        ad_request.requirements = data['requirements']
+        ad_request.status = data['status']
+        ad_request.offer_amount = data['offer_amount']
+        ad_request.updated_at = datetime.now(timezone.utc)
 
-# class AdRequestListResource(Resource):
-#     @marshal_with(ad_request_fields)
-#     def get(self):
-#         ad_requests = AdRequest.query.all()
-#         return ad_requests
+        try:
+            db.session.commit()
+            return {'message': 'AdRequest updated successfully'}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {'message': str(e)}, 500
 
-#     @marshal_with(ad_request_fields)
-#     def post(self):
-#         args = ad_request_parser.parse_args()
-#         ad_request = AdRequest(
-#             campaign_id=args['campaign_id'],
-#             influencer_id=args['influencer_id'],
-#             status=args['status'],
-#             offer_amount=args['offer_amount']
-#         )
-#         db.session.add(ad_request)
-#         db.session.commit()
-#         return ad_request, 201
+    def delete(self, ad_request_id):
+        ad_request = AdRequest.query.get(ad_request_id)
+        if ad_request:
+            db.session.delete(ad_request)
+            db.session.commit()
+            return {'message': 'AdRequest deleted'}, 200
+        return {'message': 'AdRequest not found'}, 404
 
-# api.add_resource(AdRequestResource, '/ad_request/<int:ad_request_id>')
-# api.add_resource(AdRequestListResource, '/ad_requests')
+api.add_resource(AdRequestResource, '/ad_request/<int:ad_request_id>', '/ad_requests')

@@ -1,0 +1,73 @@
+
+{% extends 'main/layout.html' %}
+
+{% block script %} {% endblock script %}
+
+{% block modal %}
+<!-- Delete Ad Request Modal -->
+<div class="modal fade" id="deleteAdRequestModal" tabindex="-1" aria-labelledby="deleteAdRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAdRequestModalLabel">Delete Ad Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this Ad Request? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    
+                    <form id="deleteAdRequestForm" method="POST">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock modal %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Ad Requests</h1>
+        <a href="{{ url_for('sponsor.create_ad_request', campaign_id=campaign_id) }}" class="btn btn-primary">Create New Ad Request</a>
+    </div>
+    {% if ad_requests %}
+        <div class="list-group">
+            {% for ad_request in ad_requests %}
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">{{ ad_request.campaign_id }}</h5>
+                        <p class="mb-1">{{ ad_request.messages }}</p>
+                        <small>Status: {{ ad_request.status }}</small>
+                    </div>
+                    <div class="btn-group" role="group" aria-label="Ad Request Actions">
+                        <a href="{{ url_for('sponsor.edit_ad_request', ad_request_id=ad_request.id) }}" class="btn btn-secondary">Edit</a>
+                        {{ form.hidden_tag() }}
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAdRequestModal" data-ad-request-id="{{ ad_request.id }}">Delete</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No ad requests available.</p>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var deleteAdRequestModal = document.getElementById('deleteAdRequestModal');
+        deleteAdRequestModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget; // Button that triggered the modal
+            var adRequestId = button.getAttribute('data-ad-request-id'); // Extract info from data-* attributes
+            var form = deleteAdRequestModal.querySelector('form');
+            form.action = '/ad_requests/' + adRequestId + '/delete'; // Update form action dynamically
+        });
+    });
+</script>
+{% endblock content %}

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
@@ -85,10 +85,12 @@ class AdRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'), nullable=False)
     influencer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    status = db.Column(db.String(20), nullable=False, default='Pending')
+    messages = db.Column(db.Text)
+    requirements = db.Column(db.Text)
+    status = db.Column(db.String(20), nullable=False, default='Pending')  # 'Pending', 'Accepted', 'Rejected'
     offer_amount = db.Column(db.Float, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         return f"AdRequest('{self.campaign_id}', '{self.influencer_id}', '{self.status}')"
@@ -107,5 +109,16 @@ campaign_schema = CampaignSchema()
 campaigns_schema = CampaignSchema(many=True)
 
 
+class AdRequestSchema(SQLAlchemyAutoSchema):
+    created_at = fields.DateTime(format='%Y-%m-%d')  # Ensure proper format
+    updated_at = fields.DateTime(format='%Y-%m-%d')    # Ensure proper format
+
+    class Meta:
+        model = AdRequest
+        include_relationships = True
+        load_instance = True
+
+adRequest_schema = AdRequestSchema()
+adRequests_schema = AdRequestSchema(many=True)
 
     

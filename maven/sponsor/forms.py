@@ -51,11 +51,19 @@ class CampaignForm(FlaskForm):
     goals = StringField('Goals')
 
 
-# class AdRequestForm(FlaskForm):
-#     campaign_id = IntegerField('Campaign ID', validators=[DataRequired()])
-#     influencer_id = IntegerField('Influencer ID', validators=[DataRequired()])
-#     messages = TextAreaField('Messages', validators=[DataRequired()])
-#     requirements = TextAreaField('Requirements', validators=[DataRequired()])
-#     payment_amount = DecimalField('Payment Amount', validators=[DataRequired(), NumberRange(min=0)])
-#     status = SelectField('Status', choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected')], validators=[DataRequired()])
-#     submit = SubmitField('Submit')
+class AdRequestForm(FlaskForm):
+    campaign_id = IntegerField('Campaign ID', validators=[DataRequired()])
+    influencer_id = IntegerField('Influencer ID', validators=[DataRequired()])
+    messages = TextAreaField('Messages', validators=[DataRequired()])
+    requirements = TextAreaField('Requirements', validators=[DataRequired()])
+    offer_amount = DecimalField('Offer Amount', validators=[DataRequired(), NumberRange(min=0)])
+    status = SelectField('Status', choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected')], validators=[DataRequired()])
+    submit = SubmitField('Create Ad Request')
+    
+
+    def __init__(self, *args, **kwargs):
+        super(AdRequestForm, self).__init__(*args, **kwargs)
+        if 'campaign_id' in kwargs:
+            self.campaign_id.data = kwargs['campaign_id']
+
+
