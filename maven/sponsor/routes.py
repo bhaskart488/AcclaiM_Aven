@@ -2,7 +2,7 @@ import os
 from flask import render_template, url_for, flash, redirect, request, Blueprint, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from maven import db
-from maven.models import User, Sponsor, Campaign, AdRequest
+from maven.models import User, Sponsor, Campaign, AdRequest, Influencer
 from maven.sponsor.forms import SponsorForm, CampaignForm, AdRequestForm
 from werkzeug.utils import secure_filename
 import requests
@@ -333,7 +333,11 @@ def create_ad_request(campaign_id):
             flash('Failed to create Ad Request', 'danger')
     
     # print(campaign_id)
-    return render_template('sponsor/create_ad_request.html', title='Create Ad Request', form=form, campaign_id=campaign_id)
+
+
+    influencers = Influencer.query.all()
+    print(influencers)
+    return render_template('sponsor/create_ad_request.html', title='Create Ad Request', form=form, campaign_id=campaign_id, influencers=influencers)
 
 
 # Ad Request Edit Route
