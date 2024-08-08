@@ -1,36 +1,123 @@
 {% extends 'main/layout.html' %}
 
+
+
 {% block script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
 {% endblock script %}
 
 {% block content %}
+    
+<body>
+    <h1>Admin Dashboard</h1>
+    <div class="charts">
+        <div class="row">
+            <div class="column">
+                <canvas id="userChart" width="200" height="200"></canvas>
+            </div>
+            <div class="column">
+                <canvas id="campaignChart" width="200" height="200"></canvas>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <canvas id="adRequestChart" width="200" height="200"></canvas>
+            </div>
+            <div class="column">
+                <canvas id="flaggedChart" width="200" height="200"></canvas>
+            </div>
+        </div>
+    </div>
 
-    <canvas id="myChart" width="400" height="200"></canvas>
     <script>
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
+        var userCtx = document.getElementById('userChart').getContext('2d');
+        var userChart = new Chart(userCtx, {
             type: 'bar',
             data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                labels: ['Active Users'],
                 datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2, 3, 7],
+                    label: '# of Active Users',
+                    data: [10], // Replace with actual value or JavaScript variable
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        var campaignCtx = document.getElementById('campaignChart').getContext('2d');
+        var campaignChart = new Chart(campaignCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Total Campaigns', 'Public Campaigns', 'Private Campaigns'],
+                datasets: [{
+                    label: '# of Campaigns',
+                    data: [20, 15, 5], // Replace with actual values or JavaScript variables
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)',
-                        'rgba(255, 99, 132, 0.2)'
+                        'rgba(255, 206, 86, 0.2)'
                     ],
                     borderColor: [
                         'rgba(255, 99, 132, 1)',
                         'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        var adRequestCtx = document.getElementById('adRequestChart').getContext('2d');
+        var adRequestChart = new Chart(adRequestCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Ad Requests'],
+                datasets: [{
+                    label: '# of Ad Requests',
+                    data: [50], // Replace with actual value or JavaScript variable
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        var flaggedCtx = document.getElementById('flaggedChart').getContext('2d');
+        var flaggedChart = new Chart(flaggedCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Flagged Sponsors', 'Flagged Influencers'],
+                datasets: [{
+                    label: '# of Flagged Users',
+                    data: [8, 12], // Replace with actual values or JavaScript variables
+                    backgroundColor: [
+                        'rgba(255, 159, 64, 0.2)',
+                        'rgba(255, 99, 132, 0.2)'
+                    ],
+                    borderColor: [
                         'rgba(255, 159, 64, 1)',
                         'rgba(255, 99, 132, 1)'
                     ],
@@ -46,4 +133,5 @@
             }
         });
     </script>
+</body>
 {% endblock content %}

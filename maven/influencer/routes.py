@@ -63,19 +63,35 @@ def profile(user_id):
         print("Profile route received a GET request")
 
     form = InfluencerForm()
-    
+
     print(f"Received user_id: {user_id}")
-    
+
     try:
         influencer = Influencer.query.filter_by(user_id=user_id).first_or_404()
         print(f"Influencer found: {influencer}")
     except Exception as e:
         print(f"Error retrieving influencer: {e}")
         return render_template('errors/404.html'), 404
-    
+
     # Check if the current user is the owner of the profile
     is_owner = influencer.user_id == current_user.id
     print(f"Is owner: {is_owner}")
+
+    if is_owner:
+        # Pre-fill the form fields with influencer data
+        form.full_name.data = influencer.full_name
+        form.email.data = influencer.email
+        form.phone.data = influencer.phone
+        form.mobile.data = influencer.mobile
+        form.address.data = influencer.address
+        form.category.data = influencer.category
+        form.niche.data = influencer.niche.split(',') if influencer.niche else []
+        form.twitter_handle.data = influencer.twitter_handle
+        form.twitter_followers.data = influencer.twitter_followers
+        form.instagram_handle.data = influencer.instagram_handle
+        form.instagram_followers.data = influencer.instagram_followers
+        form.facebook_handle.data = influencer.facebook_handle
+        form.facebook_followers.data = influencer.facebook_followers
 
     if form.validate_on_submit():
         print("Profile route received validate request")
@@ -103,7 +119,7 @@ def profile(user_id):
             picture_path = os.path.join('maven/static/profile_pics', filename)
             picture_file.save(picture_path)
             influencer.profile_picture = filename
-        
+
         db.session.commit()
         flash('Your profile has been updated!', 'success')
         return redirect(url_for('influencer.profile', user_id=user_id))
@@ -115,6 +131,9 @@ def profile(user_id):
         return render_template('influencer/profile.html', title='Profile', form=form, influencer=influencer)
     else:
         return render_template('influencer/profile_visitor.html', title='Profile', influencer=influencer)
+
+
+
 #----------------------
 # Ad-request routes
 
@@ -130,12 +149,13 @@ def profile(user_id):
 @influencer.route('/ad_requests', methods=['GET'])
 @login_required
 def view_requests():
-    ad_requests = AdRequest.query.filter_by(influencer_id=current_user.id).all()
+    influencer = Influencer.query.filter_by(user_id=current_user.id).first_or_404()
+    ad_requests = AdRequest.query.filter_by(influencer_id=influencer.id).all()
     return render_template('influencer/view_requests.html', ad_requests=ad_requests)
 
 
 
-@influencer.route('/ad_requests/<int:ad_request_id>/accept', methods=['POST'])
+@influencer.route('/ad_requests/<int:ad_request_id>/accept', methods=['POST', 'GET'])
 @login_required
 def accept_ad_request(ad_request_id):
     ad_request = AdRequest.query.get_or_404(ad_request_id)
@@ -145,7 +165,7 @@ def accept_ad_request(ad_request_id):
     return redirect(url_for('influencer.view_requests'))
 
 
-@influencer.route('/ad_requests/<int:ad_request_id>/reject', methods=['POST'])
+@influencer.route('/ad_requests/<int:ad_request_id>/reject', methods=['POST', 'GET'])
 @login_required
 def reject_ad_request(ad_request_id):
     ad_request = AdRequest.query.get_or_404(ad_request_id)
