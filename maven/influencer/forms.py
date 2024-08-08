@@ -33,6 +33,8 @@ class InfluencerForm(FlaskForm):
     submit = SubmitField('Update Profile')
 
 
+
+
 # class AdRequestForm(FlaskForm):
 #     campaign_id = IntegerField('Campaign ID', validators=[DataRequired()])
 #     influencer_id = IntegerField('Influencer ID', validators=[DataRequired()])
@@ -41,3 +43,13 @@ class InfluencerForm(FlaskForm):
 #     payment_amount = DecimalField('Payment Amount', validators=[DataRequired(), NumberRange(min=0)])
 #     status = SelectField('Status', choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected')], validators=[DataRequired()])
 #     submit = SubmitField('Submit')
+
+
+class CampaignSearchForm(FlaskForm):
+    industry = StringField('Industry', validators=[DataRequired()])
+    submit = SubmitField('Search')
+    
+
+class NegotiateForm(FlaskForm):
+    offer_amount = DecimalField('Offer Amount', validators=[DataRequired()])
+    submit = SubmitField('Submit')

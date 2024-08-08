@@ -3,7 +3,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_user, current_user, logout_user, login_required
 from maven import db
 from maven.models import User, Sponsor, Campaign, AdRequest, Influencer
-from maven.sponsor.forms import SponsorForm, CampaignForm, AdRequestForm
+from maven.sponsor.forms import SponsorForm, CampaignForm, AdRequestForm, InfluencerSearchForm
 from werkzeug.utils import secure_filename
 import requests
 
@@ -401,3 +401,22 @@ def delete_ad_request(ad_request_id):
         flash('Invalid request method', 'danger')
     # ad_request = AdRequest.query.get_or_404(ad_request_id)
     return redirect(url_for('sponsor.manage_campaigns'))
+
+
+# ----------------------
+
+# search routes
+
+# ----------------------
+
+
+
+@sponsor.route('/search_influencers', methods=['GET', 'POST'])
+@login_required
+def search_influencers():
+    form = InfluencerSearchForm()
+    influencers = []
+    if form.validate_on_submit():
+        niche = form.niche.data
+        influencers = Influencer.query.filter_by(niche=niche).all()
+    return render_template('sponsor/search_results.html', form=form, influencers=influencers)

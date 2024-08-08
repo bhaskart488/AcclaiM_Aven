@@ -1,0 +1,24 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+<h1>Search Influencers</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.niche.label }} {{ form.niche(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-primary") }}
+    </div>
+</form>
+<h2>Results</h2>
+<ul>
+    {% for influencer in influencers %}
+    <li>
+        <a href="{{ url_for('influencer.profile', user_id=influencer.user_id) }}">
+            {{ influencer.full_name }} - {{ influencer.niche }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

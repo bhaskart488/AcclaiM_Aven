@@ -67,3 +67,9 @@ class AdRequestForm(FlaskForm):
             self.campaign_id.data = kwargs['campaign_id']
 
 
+
+
+
+class InfluencerSearchForm(FlaskForm):
+    niche = StringField('Niche', validators=[DataRequired()])
+    submit = SubmitField('Search')

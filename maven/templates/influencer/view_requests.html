@@ -1,10 +1,12 @@
-{% extends "layout.html" %}
+{% extends 'main/layout.html' %}
 {% block content %}
-<h2>My Ad Requests</h2>
+<h1>Ad Requests</h1>
 <ul>
     {% for ad_request in ad_requests %}
-    <li>
-        {{ ad_request.campaign.name }} - {{ ad_request.status }} - {{ ad_request.offer_amount }}
+    <li>{{ ad_request.campaign.name }} - {{ ad_request.status }}
+        <a href="{{ url_for('influencer.accept_ad_request', ad_request_id=ad_request.id) }}" class="btn btn-success">Accept</a>
+        <a href="{{ url_for('influencer.reject_ad_request', ad_request_id=ad_request.id) }}" class="btn btn-danger">Reject</a>
+        <a href="{{ url_for('influencer.negotiate_ad_request', ad_request_id=ad_request.id) }}" class="btn btn-warning">Negotiate</a>
     </li>
     {% endfor %}
 </ul>
