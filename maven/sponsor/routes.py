@@ -2,7 +2,7 @@ import os
 from flask import render_template, url_for, flash, redirect, request, Blueprint, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from maven import db
-from maven.models import User, Sponsor, Campaign, AdRequest, Influencer
+from maven.models import User, Sponsor, Campaign, AdRequest, Influencer, Notification
 from maven.sponsor.forms import SponsorForm, CampaignForm, AdRequestForm, InfluencerSearchForm
 from werkzeug.utils import secure_filename
 import requests
@@ -236,6 +236,41 @@ def create_campaign():
     return render_template('sponsor/create_campaign.html', title='Create Campaign', form=form)
 
 
+# campaign visitor profile
+# -----------------------
+# external
+
+@sponsor.route('/campaigns/<int:campaign_id>/profile', methods=['GET', 'POST'])
+@login_required
+def campaign_visitor_profile(campaign_id):
+    campaign = Campaign.query.get_or_404(campaign_id)
+    
+    if request.method == 'POST':
+        # Create an ad request and notify the sponsor
+        ad_request = AdRequest(
+            influencer_id=current_user.id,
+            campaign_id=campaign.id,
+            status='Pending',
+            messages= 'Interested in Campaign, Please allot an ad slot for me',
+            requirements='Ad Request',
+            offer_amount= 1.0,
+        )
+        db.session.add(ad_request)
+        db.session.commit()
+        
+        notification = Notification(
+            user_id=campaign.sponsor_id,
+            message=f'Influencer {current_user.username} is interested in your campaign {campaign.name}.'
+        )
+        db.session.add(notification)
+        db.session.commit()
+        
+        flash('Ad request sent to the sponsor', 'success')
+        return redirect(url_for('influencer.search_campaigns'))
+    
+    return render_template('sponsor/campaign_visitor_profile.html', campaign=campaign)
+
+
 # Campaign Edit Route
 
 @sponsor.route('/campaigns/<int:campaign_id>/edit', methods=['GET', 'POST', 'PUT'])
@@ -352,7 +387,6 @@ def manage_ad_requests(campaign_id):
 def create_ad_request(campaign_id):
     form = AdRequestForm()
     sponsor_id = current_user.id
-    # campaign_id = request.form.get('campaign_id')
 
     if form.validate_on_submit():
         data = {
@@ -367,15 +401,22 @@ def create_ad_request(campaign_id):
         response = requests.post(f'{API_URL}/ad_requests', json=data)
         if response.status_code == 201:
             flash('Ad Request created successfully', 'success')
+            
+            # Send notification to the influencer
+            influencer_id = form.influencer_id.data
+            influencer = Influencer.query.get(influencer_id)
+            notification = Notification(
+                user_id=influencer.user_id,
+                message=f'You have been selected for an ad request for campaign {campaign_id}.'
+            )
+            db.session.add(notification)
+            db.session.commit()
+            
             return redirect(url_for('sponsor.manage_ad_requests', campaign_id=campaign_id))
         else:
             flash('Failed to create Ad Request', 'danger')
     
-    # print(campaign_id)
-
-
     influencers = Influencer.query.all()
-    print(influencers)
     return render_template('sponsor/create_ad_request.html', title='Create Ad Request', form=form, campaign_id=campaign_id, influencers=influencers)
 
 
@@ -412,6 +453,18 @@ def edit_ad_request(ad_request_id):
         if response.status_code == 200:
             flash('Ad Request updated successfully', 'success')
             form.populate_obj(ad_request_ins)
+            
+            # Send notification to the influencer
+            influencer_id = form.influencer_id.data
+            influencer = Influencer.query.get(influencer_id)
+            campaign_name = Campaign.query.get(ad_request["campaign_id"]).name
+            notification = Notification(
+                user_id=influencer.user_id,
+                message=f'Your ad request for campaign {campaign_name} has been updated.'
+            )
+            db.session.add(notification)
+            db.session.commit()
+            
             return redirect(url_for('sponsor.manage_ad_requests', campaign_id=ad_request['campaign_id']))
         else:
             flash('Failed to update Ad Request', 'danger')
@@ -442,7 +495,54 @@ def delete_ad_request(ad_request_id):
     return redirect(url_for('sponsor.manage_campaigns'))
 
 
+# All Ad Requests Route
+@sponsor.route('/ad_requests/all', methods=['GET'])
+@login_required
+def all_ad_requests():
+    #  # Query all ad requests
+    # ad_requests = (
+    #     db.session.query(AdRequest)
+    #     .join(Campaign, AdRequest.campaign_id == Campaign.id)
+    #     .join(Influencer, AdRequest.influencer_id == Influencer.id)
+    #     .filter(Campaign.sponsor_id == current_user.id)
+    #     .all()
+    # )
+    # return render_template('sponsor/all_ad_requests.html', ad_requests=ad_requests, title='All Ad Requests')
+
+     # Query all ad requests with campaign name and influencer name
+    ad_requests = (
+        db.session.query(
+            AdRequest.id,
+            AdRequest.status,
+            AdRequest.offer_amount,
+            Campaign.name.label('campaign_name'),
+            Influencer.full_name.label('influencer_name')
+        )
+        .join(Campaign, AdRequest.campaign_id == Campaign.id)
+        .join(Influencer, AdRequest.influencer_id == Influencer.id)
+        .filter(Campaign.sponsor_id == current_user.id)
+        .all()
+    )
+    return render_template('sponsor/all_ad_requests.html', ad_requests=ad_requests, title='All Ad Requests')
 # ----------------------
+
+# notification routes
+
+@sponsor.route('/sponsor/notifications')
+def view_notifications():
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    return render_template(url_for('main.notifications'), notifications=notifications)
+
+
+# maven/sponsor/routes.py
+@sponsor.route('/sponsor/notifications/read/<int:notification_id>', methods=['POST'])
+def mark_notification_as_read(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    notification.is_read = True
+    db.session.commit()
+    return redirect(url_for('sponsor.view_notifications'))
+
+
 
 # search routes
 

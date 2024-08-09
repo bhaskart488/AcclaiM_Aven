@@ -21,8 +21,8 @@ class InfluencerForm(FlaskForm):
     phone = StringField('Phone')
     mobile = StringField('Mobile')
     address = StringField('Address')
-    category = SelectField('Category', choices=[('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food')], validators=[DataRequired()])
-    niche = SelectMultipleField('Niche', choices=[('tech', 'Tech'), ('style', 'Style'), ('gourmet', 'Gourmet')], validators=[DataRequired()])
+    category = SelectField('Category', choices=[('national', 'National'), ('international', 'International'), ('local', 'Local'), ('regional', 'Regional'), ('global', 'Global')], validators=[DataRequired()])
+    niche = SelectMultipleField('Niche', choices=[('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food'), ('travel', 'Travel'), ('fitness', 'Fitness'), ('music', 'Music'), ('art', 'Art'), ('health', 'Health'), ('beauty', 'Beauty'), ('sports', 'Sports')], validators=[DataRequired()])
     profile_picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
     twitter_handle = StringField('Twitter Handle')
     twitter_followers = StringField('Twitter Followers')
@@ -34,22 +34,25 @@ class InfluencerForm(FlaskForm):
 
 
 
+class AdRequestForm(FlaskForm):
+    campaign_id = StringField('Campaign ID', validators=[DataRequired()])
+    influencer_id = StringField('Influencer ID', validators=[DataRequired()])
+    messages = TextAreaField('Messages')
+    requirements = TextAreaField('Requirements')
+    status = SelectField('Status', choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected')], validators=[DataRequired()])
+    offer_amount = DecimalField('Payment Amount', validators=[DataRequired(), NumberRange(min=0)])
+    submit = SubmitField('Submit')
 
-# class AdRequestForm(FlaskForm):
-#     campaign_id = IntegerField('Campaign ID', validators=[DataRequired()])
-#     influencer_id = IntegerField('Influencer ID', validators=[DataRequired()])
-#     messages = TextAreaField('Messages', validators=[DataRequired()])
-#     requirements = TextAreaField('Requirements', validators=[DataRequired()])
-#     payment_amount = DecimalField('Payment Amount', validators=[DataRequired(), NumberRange(min=0)])
-#     status = SelectField('Status', choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected')], validators=[DataRequired()])
-#     submit = SubmitField('Submit')
-
-
-class CampaignSearchForm(FlaskForm):
-    industry = StringField('Industry', validators=[DataRequired()])
-    submit = SubmitField('Search')
-    
 
 class NegotiateForm(FlaskForm):
     offer_amount = DecimalField('Offer Amount', validators=[DataRequired()])
+    messages = TextAreaField('Messages', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+
+
+
+class CampaignSearchForm(FlaskForm):
+    industry = SelectField('Industry', choices=[('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food'), ('travel', 'Travel'), ('fitness', 'Fitness'), ('music', 'Music'), ('art', 'Art'), ('health', 'Health'), ('beauty', 'Beauty'), ('sports', 'Sports')], validators=[DataRequired()])
+    submit = SubmitField('Search')
+    

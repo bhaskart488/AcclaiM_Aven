@@ -20,7 +20,7 @@ class SponsorForm(FlaskForm):
     phone = StringField('Phone')
     mobile = StringField('Mobile')
     address = StringField('Address')
-    industry = SelectField('Industry', choices=[('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food')], validators=[DataRequired()])
+    industry = SelectField('Industry', choices=[('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food'), ('travel', 'Travel'), ('fitness', 'Fitness'), ('music', 'Music'), ('art', 'Art'), ('health', 'Health'), ('beauty', 'Beauty'), ('sports', 'Sports')], validators=[DataRequired()])
     profile_picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
     website = StringField('Website')
     budget = StringField('Budget')
@@ -67,7 +67,9 @@ class AdRequestForm(FlaskForm):
             self.campaign_id.data = kwargs['campaign_id']
 
 
-
+class NegotiateForm(FlaskForm):
+    offer_amount = DecimalField('Offer Amount', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
 
 class InfluencerSearchForm(FlaskForm):

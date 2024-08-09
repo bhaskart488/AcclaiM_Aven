@@ -1,0 +1,11 @@
+{% extends 'main/layout.html' %}
+{% block content %}
+<h1>Notifications</h1>
+<ul>
+    {% for notification in notifications %}
+    <li class="{{ 'read' if notification.is_read else 'unread' }}">
+        {{ notification.message }} - {{ notification.timestamp }}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,5 +1,6 @@
-from flask import render_template, request, Blueprint
-# from maven.models import Post
+from flask import render_template, request, Blueprint, url_for
+from maven.models import Notification
+from flask_login import login_required, current_user
 
 main = Blueprint('main', __name__)
 
@@ -16,3 +17,11 @@ def pricing():
 @main.route("/contacts")
 def contacts():    
     return render_template('main/contacts.html', title='Contacts')
+
+@main.route("/notifications")
+@login_required
+def notifications():    
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    return render_template('main/notifications.html', notifications=notifications)
+    # return render_template('main/notifications.html', title='Contacts')
+

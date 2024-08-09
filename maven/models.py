@@ -22,6 +22,10 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    @property
+    def unread_notifications_count(self):
+        return Notification.query.filter_by(user_id=self.id, is_read=False).count()
 
 
 class Influencer(db.Model):
@@ -86,6 +90,8 @@ class Campaign(db.Model):
 class AdRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'), nullable=False)
+    # if request created when logged in user is sponsor, influencer id will be selected from dropdown as the names of influencers
+    # if request created when logged in user is influencer, influencer id will be set to logged in user
     influencer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     messages = db.Column(db.Text)
     requirements = db.Column(db.Text)
@@ -124,3 +130,14 @@ adRequest_schema = AdRequestSchema()
 adRequests_schema = AdRequestSchema(many=True)
 
     
+
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message = db.Column(db.String(255), nullable=False)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+
+    def __repr__(self):
+        return f'<Notification {self.message}>'

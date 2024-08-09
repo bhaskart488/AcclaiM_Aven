@@ -1,0 +1,34 @@
+{% extends 'main/layout.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div>
+        <h1 class="text-center">Notifications</h1>
+    </div>
+    {% if notifications %}
+        <div class="list-group">
+            {% for notification in notifications %}
+
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">{{ notification.message }}</h5>
+                        <p class="mb-1">{{ notification.timestamp.strftime('%B %d, %Y %H:%M:%S') }}</p>
+                    </div>
+                    <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end" role="group" aria-label="Campaign Actions">
+                        <form action="{{ url_for('influencer.delete_notification', notification_id=notification.id) }}" method="post" ">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                        {% if not notification.is_read %}
+                        <form action="{{ url_for('influencer.mark_notification_as_read', notification_id=notification.id) }}" method="post" ">
+                            <button type="submit" class="btn btn-sm btn-light">Mark as Read</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                        
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No notifications found.</p>
+    {% endif %}
+</div>
+{% endblock %}

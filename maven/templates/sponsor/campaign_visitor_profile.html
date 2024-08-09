@@ -1,0 +1,15 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+<h1>{{ campaign.name }}</h1>
+<p><strong>Description:</strong> {{ campaign.description }}</p>
+<p><strong>Start Date:</strong> {{ campaign.start_date }}</p>
+<p><strong>End Date:</strong> {{ campaign.end_date }}</p>
+<p><strong>Budget:</strong> {{ campaign.budget }}</p>
+<p><strong>Visibility:</strong> {{ campaign.visibility }}</p>
+<p><strong>Goals:</strong> {{ campaign.goals }}</p>
+
+<form method="POST">
+    <button type="submit" class="btn btn-primary">Ad Request</button>
+</form>
+{% endblock %}

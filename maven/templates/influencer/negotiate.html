@@ -1,13 +1,25 @@
 {% extends 'main/layout.html' %}
 {% block content %}
-<h1>Negotiate Ad Request</h1>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.offer_amount.label }} {{ form.offer_amount(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.submit(class="btn btn-primary") }}
-    </div>
-</form>
+<div class="container mt-5">
+    <br>
+    <h1 class="text-center">Negotiate Ad Request</h1>
+    <br>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="input-group mb-3">
+            <span class="input-group-text">{{ form.offer_amount.label }}</span>
+            {{ form.offer_amount(class="form-control", aria_label="Amount (to the nearest dollar)") }}
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">{{ form.messages.label }}</span>
+            {{ form.messages(class="form-control", class="is-invalid" if form.messages.errors else "") }}
+            {% for error in form.messages.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-info") }}
+        </div>
+    </form>
+</div>
 {% endblock %}

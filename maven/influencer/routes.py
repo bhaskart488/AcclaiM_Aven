@@ -2,7 +2,7 @@ import os
 from flask import render_template, url_for, flash, redirect, request, Blueprint, abort
 from flask_login import login_required, current_user
 from maven import db
-from maven.models import User, Influencer, AdRequest, Campaign, Sponsor
+from maven.models import User, Influencer, AdRequest, Campaign, Sponsor, Notification
 from maven.influencer.forms import InfluencerForm, CampaignSearchForm, NegotiateForm
 # , AdRequestForm
 from werkzeug.utils import secure_filename
@@ -162,8 +162,7 @@ def profile(user_id):
 @influencer.route('/ad_requests', methods=['GET'])
 @login_required
 def view_requests():
-    influencer = Influencer.query.filter_by(user_id=current_user.id).first_or_404()
-    ad_requests = AdRequest.query.filter_by(influencer_id=influencer.id).all()
+    ad_requests = AdRequest.query.filter_by(influencer_id=Influencer.query.filter_by(user_id=current_user.id).first().id).all()
     return render_template('influencer/view_requests.html', ad_requests=ad_requests)
 
 
@@ -174,6 +173,18 @@ def accept_ad_request(ad_request_id):
     ad_request = AdRequest.query.get_or_404(ad_request_id)
     ad_request.status = 'Accepted'
     db.session.commit()
+
+    # Create a notification
+    campaign = Campaign.query.get(ad_request.campaign_id)
+    influencer = Influencer.query.get(ad_request.influencer_id)
+    notification = Notification(
+        user_id=campaign.sponsor_id,
+        message=f'Ad request {ad_request_id} for {campaign.name} has been accepted by {influencer.full_name} for INR {ad_request.offer_amount}.'
+    )
+    db.session.add(notification)
+    db.session.commit()
+
+
     flash('Ad Request accepted', 'success')
     return redirect(url_for('influencer.view_requests'))
 
@@ -184,6 +195,18 @@ def reject_ad_request(ad_request_id):
     ad_request = AdRequest.query.get_or_404(ad_request_id)
     ad_request.status = 'Rejected'
     db.session.commit()
+
+
+    # Create a notification
+    campaign = Campaign.query.get(ad_request.campaign_id)
+    influencer = Influencer.query.get(ad_request.influencer_id)
+    notification = Notification(
+        user_id=campaign.sponsor_id,
+        message=f'Ad request {ad_request_id} has been rejected by {influencer.full_name} for INR {ad_request.offer_amount}.'
+    )
+    db.session.add(notification)
+    db.session.commit()
+
     flash('Ad Request rejected', 'danger')
     return redirect(url_for('influencer.view_requests'))
 
@@ -195,10 +218,67 @@ def negotiate_ad_request(ad_request_id):
     form = NegotiateForm()
     if form.validate_on_submit():
         ad_request.offer_amount = form.offer_amount.data
+        ad_request.messages = form.messages.data  # Save the messages data
         db.session.commit()
+        
+        # Create a notification
+        campaign = Campaign.query.get(ad_request.campaign_id)
+        influencer = Influencer.query.get(ad_request.influencer_id)
+
+        notification = Notification(
+            user_id=campaign.sponsor_id,
+            message=f'Ad request {ad_request_id} has a negotiation request for INR {form.offer_amount.data} by {influencer.full_name}.'
+        )
+        db.session.add(notification)
+        db.session.commit()
+        
         flash('Negotiation submitted', 'success')
         return redirect(url_for('influencer.view_requests'))
+    else:
+        form.offer_amount.data = ad_request.offer_amount  # Prefill the offer_amount data
+        form.messages.data = ad_request.messages  # Prefill the messages data
     return render_template('influencer/negotiate.html', form=form, ad_request=ad_request)
+
+
+@influencer.route('/ad_request/<int:ad_request_id>')
+def view_ad_request(ad_request_id):
+    ad_request = AdRequest.query.get_or_404(ad_request_id)
+    campaign = Campaign.query.get(ad_request.campaign_id)
+    influencer = Influencer.query.get(ad_request.influencer_id)
+    
+    if influencer.user_id != current_user.id:
+        flash('You do not have permission to view this ad request', 'danger')
+        return redirect(url_for('influencer.view_requests'))
+    
+    return render_template('influencer/view_ad_request.html', ad_request=ad_request, campaign=campaign, influencer=influencer)
+
+
+#notification route
+
+@influencer.route('/notifications')
+def view_notifications():
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    return render_template('main/notifications.html', notifications=notifications)
+
+
+@influencer.route('/notifications/read/<int:notification_id>', methods=['POST'])
+def mark_notification_as_read(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    if notification.user_id != current_user.id:
+        abort(403)  # Forbidden
+    notification.is_read = True
+    db.session.commit()
+    return redirect(url_for('main.notifications'))
+
+@influencer.route('/notifications/delete/<int:notification_id>', methods=['POST'])
+@login_required
+def delete_notification(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    if notification.user_id != current_user.id:
+        abort(403)  # Forbidden
+    db.session.delete(notification)
+    db.session.commit()
+    return redirect(url_for('main.notifications'))
 
 # --------------------
 
@@ -208,20 +288,21 @@ def negotiate_ad_request(ad_request_id):
 
 
 
-@influencer.route('/search_campaigns', methods=['GET', 'POST'])
+@influencer.route('/influencer/search_campaigns', methods=['GET', 'POST'])
 @login_required
 def search_campaigns():
     form = CampaignSearchForm()
     campaigns = []
+    industry = None
+    
     if form.validate_on_submit():
         industry = form.industry.data
         # public_visibility = 'public'  # Assuming 'public' is a string; adjust if it's a different type
-        campaigns = Campaign.query.join(Sponsor).filter(
+        campaigns = Campaign.query.join(Sponsor, Sponsor.user_id == Campaign.sponsor_id).filter(
             Sponsor.industry == industry,
             Campaign.visibility == 'public'
         ).all()
-
-        print(campaigns)
-    return render_template('influencer/search_results.html', form=form, campaigns=campaigns)
+        
+    return render_template('influencer/search_results.html', form=form, campaigns=campaigns, industry=industry)
 
 # edit the user_id, sponsor_id mismatch.

@@ -46,8 +46,8 @@
                             <h5 class="mb-1">{{ campaign.name }}</h5>
                             <p class="mb-1">{{ campaign.description }}</p>
                         </div>
-                        <div class="btn-group" role="group" aria-label="Campaign Actions">
-                            <a href="{{ url_for('sponsor.manage_ad_requests', campaign_id=campaign.id) }}" class="btn btn-secondary">Ad Request</a>
+                        <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end" role="group" aria-label="Campaign Actions">
+                            <a href="{{ url_for('sponsor.manage_ad_requests', campaign_id=campaign.id) }}" class="btn btn-info">Ad Request</a>
                             <a href="{{ url_for('sponsor.edit_campaign', campaign_id=campaign.id) }}" class="btn btn-secondary">Edit</a>
                             {{ form.hidden_tag() }}
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCampaignModal" data-campaign-id="{{ campaign.id }}">Delete</button>
