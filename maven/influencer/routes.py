@@ -77,7 +77,7 @@ def profile(user_id):
     is_owner = influencer.user_id == current_user.id
     print(f"Is owner: {is_owner}")
 
-    if is_owner:
+    if not is_owner:
         # Pre-fill the form fields with influencer data
         form.full_name.data = influencer.full_name
         form.email.data = influencer.email
@@ -85,7 +85,8 @@ def profile(user_id):
         form.mobile.data = influencer.mobile
         form.address.data = influencer.address
         form.category.data = influencer.category
-        form.niche.data = influencer.niche.split(',') if influencer.niche else []
+        if form.niche.data:
+            influencer.niche = ','.join(form.niche.data)
         form.twitter_handle.data = influencer.twitter_handle
         form.twitter_followers.data = influencer.twitter_followers
         form.instagram_handle.data = influencer.instagram_handle
@@ -126,13 +127,25 @@ def profile(user_id):
     else:
         print(form.errors)
 
+    form.full_name.data = influencer.full_name
+    form.email.data = influencer.email
+    form.phone.data = influencer.phone
+    form.mobile.data = influencer.mobile
+    form.address.data = influencer.address
+    form.category.data = influencer.category
+    form.niche.data = influencer.niche.split(',') if influencer.niche else []
+    form.twitter_handle.data = influencer.twitter_handle
+    form.twitter_followers.data = influencer.twitter_followers
+    form.instagram_handle.data = influencer.instagram_handle
+    form.instagram_followers.data = influencer.instagram_followers
+    form.facebook_handle.data = influencer.facebook_handle
+    form.facebook_followers.data = influencer.facebook_followers
+
     # Render the profile template with different context based on whether the current user is the owner
     if is_owner:
         return render_template('influencer/profile.html', title='Profile', form=form, influencer=influencer)
     else:
         return render_template('influencer/profile_visitor.html', title='Profile', influencer=influencer)
-
-
 
 #----------------------
 # Ad-request routes
