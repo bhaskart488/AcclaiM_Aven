@@ -35,7 +35,13 @@
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.index') }}">Home</a></li>
                 {% if current_user.is_authenticated %}
-                    {% if current_user.role == 'influencer' %}
+                    {% if current_user.role == 'admin' %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.search_users') }}">Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.search_campaigns') }}">Campaigns</a></li>
+                        <!-- Add more admin-specific links here -->
+
+                    {% elif current_user.role == 'influencer' %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.dashboard') }}">Dashboard</a></li>
                         <!-- Add more influencer-specific links here -->
                     {% elif current_user.role == 'sponsor' %}

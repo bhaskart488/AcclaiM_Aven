@@ -1,0 +1,16 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+<h2>Campaign Details</h2>
+<p>Name: {{ campaign.name }}</p>
+<p>Description: {{ campaign.description }}</p>
+<p>Visibility: {{ campaign.visibility }}</p>
+<ul>
+    <li>Pending Ad Requests: {{ pending_ad_requests }}</li>
+    <li>Completed Ad Requests: {{ completed_ad_requests }}</li>
+    <li>Rejected Ad Requests: {{ rejected_ad_requests }}</li>
+    <li>Ratio of Pending:Completed:Rejected Ad Requests: {{ pending_ad_requests }}:{{ completed_ad_requests }}:{{ rejected_ad_requests }}</li>
+    <li>Progress: {{ progress }}</li>
+    <li>Progress Bar: <progress value="{{ progress }}" max="1.0"></progress></li>
+</ul>
+{% endblock  content%}

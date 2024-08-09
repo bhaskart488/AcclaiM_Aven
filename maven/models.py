@@ -12,6 +12,7 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     role = db.Column(db.String(20), nullable=False)  # 'admin', 'sponsor', 'influencer'
+    flagged = db.Column(db.Boolean, default=False)  # New field
 
     influencer = db.relationship('Influencer', uselist=False, backref='user', lazy=True)
     sponsor = db.relationship('Sponsor', uselist=False, backref='user', lazy=True)
@@ -71,6 +72,7 @@ class Campaign(db.Model):
     budget = db.Column(db.Integer, nullable=False)
     visibility = db.Column(db.String(10), nullable=False)  # 'public' or 'private'
     goals = db.Column(db.String(200))
+    flagged = db.Column(db.Boolean, default=False)  # New field
     
     sponsor_id = db.Column(db.Integer, db.ForeignKey('sponsor.id'), nullable=False)
     sponsor = db.relationship('Sponsor', backref=db.backref('campaigns', lazy=True))
