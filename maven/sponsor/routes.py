@@ -85,10 +85,43 @@ def delete_profile(user_id):
 @sponsor.route('/sponsor/profile/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def profile(user_id):
-    sponsor = Sponsor.query.filter_by(user_id=user_id).first_or_404()
+    if request.method == 'POST':
+        print("Profile route received a POST request")
+
+    if request.method == 'GET':
+        print("Profile route received a GET request")
+    
     form = SponsorForm()
 
+    print(f"Received user_id: {user_id}")
+
+    try:
+        sponsor = Sponsor.query.filter_by(user_id=user_id).first_or_404()
+        print(f"Sponsor found: {sponsor}")
+    except Exception as e:
+        print(f"Error retrieving sponsor: {e}")
+        return render_template('errors/404.html'), 404
+    
+    # Check if the current user is the owner of the profile
+    is_owner = sponsor.user_id == current_user.id
+    print(f"Is owner: {is_owner}")
+
+    if not is_owner:
+        # Pre-fill the form fields with sponsor data
+        # Load existing sponsor details
+        form.full_name.data = sponsor.full_name
+        form.email.data = sponsor.email
+        form.phone.data = sponsor.phone
+        form.mobile.data = sponsor.mobile
+        form.address.data = sponsor.address
+        form.industry.data = sponsor.industry
+        form.website.data = sponsor.website
+        form.budget.data = sponsor.budget
+
+        
+
     if form.validate_on_submit():
+        print("Profile route received validate request")
         # Update Sponsor details
         sponsor.full_name = form.full_name.data
         sponsor.email = form.email.data
@@ -121,8 +154,12 @@ def profile(user_id):
     form.website.data = sponsor.website
     form.budget.data = sponsor.budget
 
-    return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
-
+    # return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
+    # Render the profile template with different context based on whether the current user is the owner
+    if is_owner:
+        return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
+    else:
+        return render_template('sponsor/profile_visitor.html', title='Profile', sponsor=sponsor)
 
 
 API_URL = 'http://localhost:5000/api'  # Replace with the actual API URL
