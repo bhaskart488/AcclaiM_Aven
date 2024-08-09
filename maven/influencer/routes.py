@@ -3,7 +3,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_required, current_user
 from maven import db
 from maven.models import User, Influencer, AdRequest, Campaign, Sponsor, Notification
-from maven.influencer.forms import InfluencerForm, CampaignSearchForm, NegotiateForm
+from maven.influencer.forms import InfluencerForm, CampaignSearchForm, NegotiateForm, UpdateCompletionStatusForm
 # , AdRequestForm
 from werkzeug.utils import secure_filename
 
@@ -162,8 +162,14 @@ def profile(user_id):
 @influencer.route('/ad_requests', methods=['GET'])
 @login_required
 def view_requests():
-    ad_requests = AdRequest.query.filter_by(influencer_id=Influencer.query.filter_by(user_id=current_user.id).first().id).all()
-    return render_template('influencer/view_requests.html', ad_requests=ad_requests)
+    print(current_user.id)
+
+    ad_requests = AdRequest.query.filter_by(influencer_id=Influencer.query.filter_by(user_id=current_user.id).first().user_id).all()
+    ad_requests = AdRequest.query.filter_by(influencer_id=Influencer.query.filter_by(user_id=current_user.id).first().user_id).all()
+    campaign_ids = [ad_request.campaign_id for ad_request in ad_requests]
+    campaigns = Campaign.query.filter(Campaign.id.in_(campaign_ids)).all()
+
+    return render_template('influencer/view_requests.html', ad_requests=ad_requests, campaigns=campaigns)
 
 
 
@@ -176,7 +182,9 @@ def accept_ad_request(ad_request_id):
 
     # Create a notification
     campaign = Campaign.query.get(ad_request.campaign_id)
-    influencer = Influencer.query.get(ad_request.influencer_id)
+    # influencer = Influencer.query.get(ad_request.influencer_id)
+    influencer = Influencer.query.filter_by(user_id=ad_request.influencer_id).first()
+
     notification = Notification(
         user_id=campaign.sponsor_id,
         message=f'Ad request {ad_request_id} for {campaign.name} has been accepted by {influencer.full_name} for INR {ad_request.offer_amount}.'
@@ -199,7 +207,9 @@ def reject_ad_request(ad_request_id):
 
     # Create a notification
     campaign = Campaign.query.get(ad_request.campaign_id)
-    influencer = Influencer.query.get(ad_request.influencer_id)
+    # influencer = Influencer.query.get(ad_request.influencer_id)
+    influencer = Influencer.query.filter_by(user_id=ad_request.influencer_id).first()
+
     notification = Notification(
         user_id=campaign.sponsor_id,
         message=f'Ad request {ad_request_id} has been rejected by {influencer.full_name} for INR {ad_request.offer_amount}.'
@@ -211,6 +221,8 @@ def reject_ad_request(ad_request_id):
     return redirect(url_for('influencer.view_requests'))
 
 
+#negotiate route
+
 @influencer.route('/ad_requests/<int:ad_request_id>/negotiate', methods=['GET', 'POST'])
 @login_required
 def negotiate_ad_request(ad_request_id):
@@ -219,11 +231,14 @@ def negotiate_ad_request(ad_request_id):
     if form.validate_on_submit():
         ad_request.offer_amount = form.offer_amount.data
         ad_request.messages = form.messages.data  # Save the messages data
+        ad_request.status = 'Negotiation'
         db.session.commit()
         
         # Create a notification
         campaign = Campaign.query.get(ad_request.campaign_id)
-        influencer = Influencer.query.get(ad_request.influencer_id)
+        # influencer = Influencer.query.get(ad_request.influencer_id)
+        influencer = Influencer.query.filter_by(user_id=ad_request.influencer_id).first()
+
 
         notification = Notification(
             user_id=campaign.sponsor_id,
@@ -244,13 +259,42 @@ def negotiate_ad_request(ad_request_id):
 def view_ad_request(ad_request_id):
     ad_request = AdRequest.query.get_or_404(ad_request_id)
     campaign = Campaign.query.get(ad_request.campaign_id)
-    influencer = Influencer.query.get(ad_request.influencer_id)
-    
+    influencer = Influencer.query.filter_by(user_id=ad_request.influencer_id).first()
+
     if influencer.user_id != current_user.id:
         flash('You do not have permission to view this ad request', 'danger')
         return redirect(url_for('influencer.view_requests'))
-    
-    return render_template('influencer/view_ad_request.html', ad_request=ad_request, campaign=campaign, influencer=influencer)
+
+    form = UpdateCompletionStatusForm()
+    form.completion_status.data = ad_request.completion_status  # Prepopulate the completion status field
+
+    return render_template('influencer/view_ad_request.html', ad_request=ad_request, campaign=campaign, influencer=influencer, form=form)
+
+
+@influencer.route('/influencer/ad_request/<int:ad_request_id>/update_status', methods=['POST'])
+@login_required
+def update_completion_status(ad_request_id):
+    ad_request = AdRequest.query.get_or_404(ad_request_id)
+    if ad_request.influencer_id != current_user.id:
+        flash('You do not have permission to update this ad request', 'danger')
+        return redirect(url_for('influencer.view_requests'))
+
+    form = UpdateCompletionStatusForm()
+    if form.validate_on_submit():
+        # Log the form data for debugging
+        print(f"Form Data: {form.completion_status.data}")
+
+        ad_request.completion_status = form.completion_status.data
+        try:
+            db.session.commit()
+            flash('Ad request status updated successfully', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Failed to update completion status: {str(e)}', 'danger')
+    else:
+        flash('Failed to update completion status', 'danger')
+
+    return redirect(url_for('influencer.view_ad_request', ad_request_id=ad_request_id))
 
 
 #notification route

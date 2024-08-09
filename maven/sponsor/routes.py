@@ -391,7 +391,7 @@ def create_ad_request(campaign_id):
     if form.validate_on_submit():
         data = {
             'campaign_id': campaign_id,
-            'influencer_id': form.influencer_id.data,
+            'influencer_id': Influencer.query.get(form.influencer_id.data).user_id,
             'messages': form.messages.data,
             'requirements': form.requirements.data,
             'status': form.status.data,
@@ -404,7 +404,9 @@ def create_ad_request(campaign_id):
             
             # Send notification to the influencer
             influencer_id = form.influencer_id.data
-            influencer = Influencer.query.get(influencer_id)
+            # influencer = Influencer.query.get(influencer_id)
+            influencer = Influencer.query.filter_by(user_id=influencer_id).first()
+
             notification = Notification(
                 user_id=influencer.user_id,
                 message=f'You have been selected for an ad request for campaign {campaign_id}.'
@@ -456,7 +458,8 @@ def edit_ad_request(ad_request_id):
             
             # Send notification to the influencer
             influencer_id = form.influencer_id.data
-            influencer = Influencer.query.get(influencer_id)
+            influencer = Influencer.query.filter_by(user_id=influencer_id).first()
+
             campaign_name = Campaign.query.get(ad_request["campaign_id"]).name
             notification = Notification(
                 user_id=influencer.user_id,
@@ -499,29 +502,34 @@ def delete_ad_request(ad_request_id):
 @sponsor.route('/ad_requests/all', methods=['GET'])
 @login_required
 def all_ad_requests():
-    #  # Query all ad requests
+     # Query all ad requests with campaign name and influencer name
     # ad_requests = (
-    #     db.session.query(AdRequest)
+    #     db.session.query(
+    #         AdRequest.id,
+    #         AdRequest.status,
+    #         AdRequest.offer_amount,
+    #         Campaign.name.label('campaign_name'),
+    #         Influencer.full_name.label('influencer_name')
+    #     )
     #     .join(Campaign, AdRequest.campaign_id == Campaign.id)
     #     .join(Influencer, AdRequest.influencer_id == Influencer.id)
     #     .filter(Campaign.sponsor_id == current_user.id)
     #     .all()
-    # )
-    # return render_template('sponsor/all_ad_requests.html', ad_requests=ad_requests, title='All Ad Requests')
-
-     # Query all ad requests with campaign name and influencer name
     ad_requests = (
         db.session.query(
             AdRequest.id,
             AdRequest.status,
             AdRequest.offer_amount,
+            AdRequest.completion_status,
             Campaign.name.label('campaign_name'),
             Influencer.full_name.label('influencer_name')
         )
         .join(Campaign, AdRequest.campaign_id == Campaign.id)
-        .join(Influencer, AdRequest.influencer_id == Influencer.id)
+        .join(Influencer, AdRequest.influencer_id == Influencer.user_id)
         .filter(Campaign.sponsor_id == current_user.id)
         .all()
+    # influencer = Influencer.query.filter_by(user_id=ad_request.influencer_id).first() changes made after the completion status column was added
+
     )
     return render_template('sponsor/all_ad_requests.html', ad_requests=ad_requests, title='All Ad Requests')
 # ----------------------

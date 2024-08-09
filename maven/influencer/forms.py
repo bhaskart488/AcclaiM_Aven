@@ -41,7 +41,15 @@ class AdRequestForm(FlaskForm):
     requirements = TextAreaField('Requirements')
     status = SelectField('Status', choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected')], validators=[DataRequired()])
     offer_amount = DecimalField('Payment Amount', validators=[DataRequired(), NumberRange(min=0)])
+    # New field for completion status
+    completion_status = RadioField('Completion Status', choices=[('Incomplete', 'Incomplete'), ('Complete', 'Complete')], default='Incomplete', validators=[InputRequired()])
+
     submit = SubmitField('Submit')
+
+
+class UpdateCompletionStatusForm(FlaskForm):
+    completion_status = RadioField('Completion Status', choices=[('Incomplete', 'Incomplete'), ('Complete', 'Complete')], validators=[DataRequired()])
+    submit = SubmitField('Update Status')
 
 
 class NegotiateForm(FlaskForm):

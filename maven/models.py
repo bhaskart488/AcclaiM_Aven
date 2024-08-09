@@ -85,6 +85,13 @@ class Campaign(db.Model):
     
     def __repr__(self):
         return f'<Campaign {self.name}>'
+    
+    def campaign_progress(self):
+        total_ad_requests = len(self.ad_requests)
+        if total_ad_requests == 0:
+            return 0.0
+        completed_ad_requests = len([ad_request for ad_request in self.ad_requests if ad_request.completion_status == 'Complete'])
+        return completed_ad_requests / total_ad_requests
 
 
 class AdRequest(db.Model):
@@ -99,6 +106,9 @@ class AdRequest(db.Model):
     offer_amount = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    # New column for completion status
+    completion_status = db.Column(db.String(20), nullable=False, default='Incomplete')
 
     def __repr__(self):
         return f"AdRequest('{self.campaign_id}', '{self.influencer_id}', '{self.status}')"

@@ -44,7 +44,8 @@
                     <div>
                         <h5 class="mb-1">{{ ad_request.campaign_id }}</h5>
                         <p class="mb-1">{{ ad_request.messages }}</p>
-                        <small>Status: {{ ad_request.status }}</small>
+                        <small>Status: {{ ad_request.status }} --- </small>
+                        <small> {{ ad_request.completion_status }}</small>
                     </div>
                     <div class="btn-group" role="group" aria-label="Ad Request Actions">
                         <a href="{{ url_for('sponsor.edit_ad_request', ad_request_id=ad_request.id) }}" class="btn btn-secondary">Edit</a>
