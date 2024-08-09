@@ -315,6 +315,7 @@ def delete_campaign(campaign_id):
 def manage_ad_requests(campaign_id):
     form = AdRequestForm()
     sponsor_id = current_user.id
+    print('campaign_id:', campaign_id, 'sponsor_id:', sponsor_id)
 
     if request.method == 'POST':
         data = {
@@ -339,7 +340,8 @@ def manage_ad_requests(campaign_id):
         ad_requests = []
         flash('Failed to retrieve ad requests', 'danger')
 
-    ad_requests = AdRequest.query.join(Campaign).filter(Campaign.sponsor_id == current_user.id).all()
+    ad_requests = AdRequest.query.join(Campaign).filter(Campaign.sponsor_id == current_user.id, Campaign.id == campaign_id).all()
+    print(ad_requests)
     
     return render_template('sponsor/ad_requests.html', ad_requests=ad_requests, title='Ad Requests', form=form, campaign_id=campaign_id)
 
