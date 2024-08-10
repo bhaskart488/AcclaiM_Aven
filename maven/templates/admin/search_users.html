@@ -1,28 +1,46 @@
 {% extends 'main/layout.html' %}
 
-
 {% block content %}
 <div class="container">
+<!-- search  -->
+    <br>
     <h2 class="text-center">Search Users</h2>
     <br>
-<!-- search  -->
-    <form method="POST">
+    <form method="POST" class="row g-4">
         {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.industry.label }} {{ form.industry(class="form-control") }}
+        <div class="col-md-6">
+            <div class="input-group">
+                {{ form.industry.label(class="col-sm col-form-label") }} 
+                {{ form.industry(class="form-control") }}
+            </div>
         </div>
-        <div class="form-group">
-            {{ form.niche.label }} {{ form.niche(class="form-control") }}
+        <div class="col-md-6">
+            <div class="input-group">
+                {{ form.category.label(class="col-sm col-form-label") }} 
+                {{ form.category(class="form-control") }}
+            </div>
         </div>
-        <div class="form-group">
-            {{ form.user_type.label }} {{ form.user_type(class="form-control") }}
+        <div class="col-md-6">
+            <div class="input-group">
+                {{ form.user_type.label(class="col-sm col-form-label") }} 
+                {{ form.user_type(class="form-control") }}
+            </div>
         </div>
-        <div class="form-group">
-            {{ form.submit(class="btn btn-primary") }}
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
         </div>
+        
     </form>
     <br>
+</div>
 
+
+<div class="container">
+    <br>
+    <h2>Results</h2>
+    <br>
 
     <ul class="list-group">
         {% for user in users %}
@@ -36,7 +54,6 @@
                 <a href="{{ url_for('admin.view_user', user_id=user.id) }}" class="btn btn-primary">View</a>
                 {% if user.flagged %}
                 <a href="{{ url_for('admin.unflag_user', user_id=user.id) }}" class="btn btn-warning">Unflag</a>
-                    
                 {% else %}
                 <a href="{{ url_for('admin.flag_user', user_id=user.id) }}" class="btn btn-danger">Flag</a>
                     

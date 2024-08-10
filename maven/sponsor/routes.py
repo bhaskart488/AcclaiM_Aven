@@ -550,19 +550,6 @@ def create_ad_request_from_profile(influencer_id):
 @sponsor.route('/ad_requests/all', methods=['GET'])
 @login_required
 def all_ad_requests():
-     # Query all ad requests with campaign name and influencer name
-    # ad_requests = (
-    #     db.session.query(
-    #         AdRequest.id,
-    #         AdRequest.status,
-    #         AdRequest.offer_amount,
-    #         Campaign.name.label('campaign_name'),
-    #         Influencer.full_name.label('influencer_name')
-    #     )
-    #     .join(Campaign, AdRequest.campaign_id == Campaign.id)
-    #     .join(Influencer, AdRequest.influencer_id == Influencer.id)
-    #     .filter(Campaign.sponsor_id == current_user.id)
-    #     .all()
     ad_requests = (
         db.session.query(
             AdRequest.id,

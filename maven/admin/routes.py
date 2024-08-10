@@ -31,10 +31,6 @@ def dashboard():
     ad_requests = AdRequest.query.count()
     flagged_users = User.query.filter_by(flagged=True).all()
     flagged_campaigns = Campaign.query.filter_by(flagged=True).all()
-    # flagged_sponsors = Sponsor.query.filter_by(is_flagged=True).count()
-    # flagged_influencers = Influencer.query.filter_by(is_flagged=True).count()
-    # flagged_sponsors = User.query.filter_by(flagged=True, role='sponsor').count()
-    # flagged_influencers = User.query.filter_by(flagged=True, role='influencer').count()
     
 
     return render_template(
@@ -46,8 +42,6 @@ def dashboard():
         total_campaigns=total_campaigns,
         public_campaigns=public_campaigns,
         private_campaigns=private_campaigns,
-        # flagged_sponsors=flagged_sponsors,
-        # flagged_influencers=flagged_influencers
         ad_requests=ad_requests,
         flagged_users=flagged_users,
         flagged_campaigns=flagged_campaigns,
@@ -95,16 +89,8 @@ def unflag_campaign(campaign_id):
     return redirect(url_for('admin.dashboard'))
 
 
-# search routes
-
-# @admin.route('/search_campaigns', methods=['GET', 'POST'])
-# @login_required
-# def search_campaigns():
-#     campaigns = Campaign.query.all()
-#     return render_template('admin/search_campaigns.html', campaigns=campaigns, title='Admin/Campaigns')
-
-
 @admin.route('/search_campaigns', methods=['GET', 'POST'])
+@login_required
 def search_campaigns():
     form = CampaignSearchForm()
     campaigns = []
@@ -133,60 +119,40 @@ def search_campaigns():
 
     return render_template('admin/search_campaigns.html', form=form, campaigns=campaigns, industry=industry, budget=budget, sponsor_name=sponsor_name)
 
-    
-
-# @admin.route('/search_users', methods=['GET', 'POST'])
-# @login_required
-# def search_users():
-#     users = User.query.all()
-#     return render_template('admin/search_users.html', users=users)
 
 
 @admin.route('/search_users', methods=['GET', 'POST'])
+@login_required
 def search_users():
     form = UserSearchForm()
     users = []
     if form.validate_on_submit():
         industry = form.industry.data
-        niche = form.niche.data
+        category = form.category.data
         user_type = form.user_type.data
 
         query = User.query
-        if user_type == 'sponsor':
+        if user_type:
+            if user_type == 'sponsor':
+                if industry:
+                    query = query.join(Sponsor).filter(Sponsor.industry == industry)
+                else:
+                    query = query.filter(User.role == 'sponsor')
+            elif user_type == 'influencer':
+                if category:
+                    query = query.join(Influencer).filter(Influencer.category == category)
+                else:
+                    query = query.filter(User.role == 'influencer')
+        if industry and not category:
             query = query.join(Sponsor).filter(Sponsor.industry == industry)
-        elif user_type == 'influencer':
-            query = query.join(Influencer).filter(Influencer.niche == niche)
+        if category and not industry:
+            query = query.join(Influencer).filter(Influencer.category == category)
+        if not user_type and not industry and not category:
+            query = query.filter(User.role != 'admin')
 
         users = query.all()
 
     return render_template('admin/search_users.html', form=form, users=users)
-
-
-# view_details
-
-@admin.route('/campaign/<int:campaign_id>', methods=['GET'])
-@login_required
-def view_campaign(campaign_id):
-    campaign = Campaign.query.get_or_404(campaign_id)
-    completed_ad_requests = AdRequest.query.filter_by(campaign_id=campaign_id, status='completed').count()
-    pending_ad_requests = AdRequest.query.filter_by(campaign_id=campaign_id, status='pending').count()
-    rejected_ad_requests = AdRequest.query.filter_by(campaign_id=campaign_id, status='rejected').count()
-    total_ad_requests = AdRequest.query.filter_by(campaign_id=campaign_id).count()
-    if total_ad_requests > 0:
-        progress = float(completed_ad_requests / total_ad_requests)
-    else:
-        progress = float(0)
-    
-    
-    print('debug statement', completed_ad_requests, pending_ad_requests, rejected_ad_requests, total_ad_requests)
-    return render_template('admin/view_campaign.html',
-                            campaign=campaign, 
-                            progress=progress,
-                            pending_ad_requests=pending_ad_requests,
-                            completed_ad_requests=completed_ad_requests,
-                            rejected_ad_requests=rejected_ad_requests,
-                            title = 'Progress'
-                    )
 
 
 @admin.route('/user/<int:user_id>', methods=['GET'])

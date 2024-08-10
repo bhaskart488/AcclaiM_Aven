@@ -4,7 +4,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 import requests
 from maven.auth.forms import RegistrationForm, LoginForm
 from maven import db, bcrypt, login_manager
-from maven.models import User, Sponsor, Influencer
+from maven.models import User, Sponsor, Influencer, Notification
 from werkzeug.utils import secure_filename
 
 auth = Blueprint('auth', __name__)
@@ -45,6 +45,16 @@ def signup():
             elif user.role == 'influencer':
                 influencer = Influencer(user_id=user_data['id'], email=user_data['email'], full_name=user_data['username'])
                 db.session.add(influencer)
+
+
+            # Send notification to admin
+            admin_id = 1
+            notification = Notification(
+                user_id = admin_id,
+                message = f' {user_data['role']} {user_data['username']} is created.'
+            )
+            db.session.add(notification)
+
             db.session.commit()
 
             # Log in the user
