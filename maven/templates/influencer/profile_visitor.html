@@ -18,7 +18,11 @@
                     <h4>{{ influencer.full_name }}</h4>
                     <p class="text-secondary mb-1">{{ influencer.category }}</p>
                     <p class="text-muted font-size-sm">{{ influencer.address }}</p>
-                    <a href="{{ url_for('sponsor.dashboard') }}" class="btn btn-primary">Request Ad</a>
+                    {% if current_user.role == 'sponsor' %}
+                        <form method="POST" action="{{ url_for('sponsor.create_ad_request_from_profile', influencer_id=influencer.user_id) }}">
+                            <button type="submit" class="btn btn-primary">Request Ad</button>
+                        </form>
+                    {% endif %}
                 </div>
             </div>
         </div>

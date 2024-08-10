@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, SelectField, DecimalField, TextAreaField, IntegerField, DateField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, InputRequired, NumberRange
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, InputRequired, NumberRange, Optional
 from flask_login import current_user
 from maven.models import User
 from email_validator import validate_email, EmailNotValidError
@@ -73,5 +73,7 @@ class NegotiateForm(FlaskForm):
 
 
 class InfluencerSearchForm(FlaskForm):
-    niche = StringField('Niche', validators=[DataRequired()])
+    category = SelectField('Category', choices=[('', 'Select Category'), ('national', 'National'), ('international', 'International'), ('local', 'Local'), ('regional', 'Regional'), ('global', 'Global')], validators=[Optional()])
+    niche = SelectField('Niche', choices=[('', 'Select Niche'), ('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food'), ('travel', 'Travel'), ('fitness', 'Fitness'), ('music', 'Music'), ('art', 'Art'), ('health', 'Health'), ('beauty', 'Beauty'), ('sports', 'Sports')], validators=[Optional()])
+    search_text = StringField('Name', validators=[Optional()])
     submit = SubmitField('Search')

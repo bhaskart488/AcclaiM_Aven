@@ -294,7 +294,7 @@ def update_completion_status(ad_request_id):
     else:
         flash('Failed to update completion status', 'danger')
 
-    return redirect(url_for('influencer.view_ad_request', ad_request_id=ad_request_id))
+    return redirect(url_for('influencer.view_requests'))
 
 
 #notification route
@@ -331,22 +331,30 @@ def delete_notification(notification_id):
 # --------------------
 
 
-
 @influencer.route('/influencer/search_campaigns', methods=['GET', 'POST'])
 @login_required
 def search_campaigns():
     form = CampaignSearchForm()
     campaigns = []
     industry = None
+    budget = None
+    sponsor_name = None
     
     if form.validate_on_submit():
         industry = form.industry.data
-        # public_visibility = 'public'  # Assuming 'public' is a string; adjust if it's a different type
-        campaigns = Campaign.query.join(Sponsor, Sponsor.user_id == Campaign.sponsor_id).filter(
-            Sponsor.industry == industry,
+        budget = form.budget.data
+        sponsor_name = form.sponsor_name.data
+        query = Campaign.query.join(Sponsor, Sponsor.user_id == Campaign.sponsor_id).filter(
             Campaign.visibility == 'public'
-        ).all()
-        
-    return render_template('influencer/search_results.html', form=form, campaigns=campaigns, industry=industry)
+        )
+        if industry:
+            query = query.filter(Sponsor.industry == industry)
+        if budget:
+            query = query.filter(Campaign.budget <= budget)
+        if sponsor_name:
+            query = query.filter(Sponsor.full_name.ilike(f'%{sponsor_name}%'))
+        campaigns = query.add_columns(Sponsor.full_name, Sponsor.website).all()
+    
+    return render_template('influencer/search_results.html', form=form, campaigns=campaigns, industry=industry, budget=budget, sponsor_name=sponsor_name)
 
 # edit the user_id, sponsor_id mismatch.

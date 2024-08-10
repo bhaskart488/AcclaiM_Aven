@@ -160,6 +160,15 @@ def profile(user_id):
         return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
     else:
         return render_template('sponsor/profile_visitor.html', title='Profile', sponsor=sponsor)
+#         return redirect(url_for('sponsor.profile_visitor', influencer_id=user_id))
+    
+    
+
+# @sponsor.route('/influencers/<int:influencer_id>/profile', methods=['GET'])
+# @login_required
+# def profile_visitor(influencer_id):
+#     influencer = Influencer.query.get_or_404(influencer_id)
+#     return render_template('sponsor/profile_visitor.html', influencer=influencer)
 
 
 API_URL = 'http://localhost:5000/api'  # Replace with the actual API URL
@@ -498,6 +507,27 @@ def delete_ad_request(ad_request_id):
     return redirect(url_for('sponsor.manage_campaigns'))
 
 
+
+# Notification created when the sponsor is interested in an influencer and clicks "Ad Request" button on the influencer's profile
+
+@sponsor.route('/influencers/<int:influencer_id>/request_ad', methods=['POST'])
+@login_required
+def create_ad_request_from_profile(influencer_id):
+    if current_user.role != 'sponsor':
+        flash('You do not have permission to create an ad request.', 'danger')
+        return redirect(url_for('main.index'))
+
+    notification = Notification(
+        user_id=influencer_id,
+        message=f'Sponsor {current_user.username} wants to connect with you for an ad, Check campaigns for more info.'
+    )
+    db.session.add(notification)
+    db.session.commit()
+
+    flash('Notification sent to the influencer', 'success')
+    return redirect(url_for('sponsor.search_influencers'))
+
+
 # All Ad Requests Route
 @sponsor.route('/ad_requests/all', methods=['GET'])
 @login_required
@@ -564,6 +594,18 @@ def search_influencers():
     form = InfluencerSearchForm()
     influencers = []
     if form.validate_on_submit():
+        category = form.category.data
         niche = form.niche.data
-        influencers = Influencer.query.filter_by(niche=niche).all()
+        search_text = form.search_text.data
+
+        query = Influencer.query
+        if category:
+            query = query.filter_by(category=category)
+        if niche:
+            query = query.filter(Influencer.niche.ilike(f'%{niche}%'))
+        if search_text:
+            query = query.filter(Influencer.full_name.ilike(f'%{search_text}%'))
+
+        influencers = query.all()
+
     return render_template('sponsor/search_results.html', form=form, influencers=influencers)
