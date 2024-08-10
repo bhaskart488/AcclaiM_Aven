@@ -3,7 +3,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_user, current_user, logout_user, login_required
 from maven import db
 from maven.models import User, Sponsor, Campaign, AdRequest, Influencer, Notification
-from maven.sponsor.forms import SponsorForm, CampaignForm, AdRequestForm, InfluencerSearchForm
+from maven.sponsor.forms import SponsorForm, CampaignForm, AdRequestForm, InfluencerSearchForm, AdRequestEditForm
 from werkzeug.utils import secure_filename
 import requests
 
@@ -414,11 +414,18 @@ def create_ad_request(campaign_id):
             # Send notification to the influencer
             influencer_id = form.influencer_id.data
             # influencer = Influencer.query.get(influencer_id)
-            influencer = Influencer.query.filter_by(user_id=influencer_id).first()
-
+            influencer = Influencer.query.filter_by(id=influencer_id).first()
+            print('details influencer: ', influencer, influencer_id)
+            # details influencer:  <Influencer Donald Trump> 3 , this 3 is influencer.id not influencer.user_id
+            # so here we are getting the influncer_id from the form which is equal to influencer.id
+            # and our notification system works for user_id, hence we are passing it influencer.user_id not influencer.id
+            campaign_name = Campaign.query.get(campaign_id).name 
+            sponsor = Sponsor.query.filter(Sponsor.user_id == current_user.id).first()
+            sponsor_name = sponsor.full_name if sponsor else None
+            
             notification = Notification(
                 user_id=influencer.user_id,
-                message=f'You have been selected for an ad request for campaign {campaign_id}.'
+                message=f'You have been selected for an ad request for campaign {campaign_name} by {sponsor_name}.'
             )
             db.session.add(notification)
             db.session.commit()
@@ -428,7 +435,8 @@ def create_ad_request(campaign_id):
             flash('Failed to create Ad Request', 'danger')
     
     influencers = Influencer.query.all()
-    return render_template('sponsor/create_ad_request.html', title='Create Ad Request', form=form, campaign_id=campaign_id, influencers=influencers)
+    campaigns = Campaign.query.filter(Campaign.sponsor_id == sponsor_id).all()
+    return render_template('sponsor/create_ad_request.html', title='Create Ad Request', form=form, campaign_id=campaign_id, influencers=influencers, campaigns=campaigns)
 
 
 # Ad Request Edit Route
@@ -440,7 +448,7 @@ def edit_ad_request(ad_request_id):
         abort(403)  # Forbidden
 
     ad_request_ins = AdRequest.query.get_or_404(ad_request_id)
-    form = AdRequestForm(obj=ad_request_ins)
+    form = AdRequestEditForm(obj=ad_request_ins)
     response = requests.get(f'{API_URL}/ad_request/{ad_request_id}')
     if response.status_code == 200:
         ad_request = response.json()
@@ -450,38 +458,46 @@ def edit_ad_request(ad_request_id):
 
     if form.validate_on_submit():
         data = {
-            'campaign_id': form.campaign_id.data,
-            'influencer_id': form.influencer_id.data,
+            'campaign_id': ad_request['campaign_id'],
+            'influencer_id': ad_request['influencer_id'],
             'messages': form.messages.data,
             'requirements': form.requirements.data,
             'status': form.status.data,
             'offer_amount': float(form.offer_amount.data),
         }
         response = requests.put(f'{API_URL}/ad_request/{ad_request_id}', json=data)
-        print(f"Type of ad_request_ins: {type(ad_request_ins)}")
-        print(f"Type of form: {type(form)}")
-
         if response.status_code == 200:
             flash('Ad Request updated successfully', 'success')
             form.populate_obj(ad_request_ins)
-            
             # Send notification to the influencer
-            influencer_id = form.influencer_id.data
+            influencer_id = ad_request_ins.influencer_id
             influencer = Influencer.query.filter_by(user_id=influencer_id).first()
+            #debug prints
+            print('details influencer: ', influencer, influencer_id)
 
             campaign_name = Campaign.query.get(ad_request["campaign_id"]).name
+            sponsor = Sponsor.query.filter(Sponsor.user_id == current_user.id).first()
+            sponsor_name = sponsor.full_name if sponsor else None
+
+            print(influencer_id, influencer )
+
             notification = Notification(
                 user_id=influencer.user_id,
-                message=f'Your ad request for campaign {campaign_name} has been updated.'
+                message=f'Your ad request for campaign {campaign_name} has been updated by {sponsor_name}.'
             )
             db.session.add(notification)
             db.session.commit()
-            
+
             return redirect(url_for('sponsor.manage_ad_requests', campaign_id=ad_request['campaign_id']))
         else:
             flash('Failed to update Ad Request', 'danger')
-    
-    return render_template('sponsor/edit_ad_request.html', title='Edit Ad Request', form=form, ad_request=ad_request)
+
+    influencers = Influencer.query.all()
+    campaigns = Campaign.query.filter(Campaign.sponsor_id == current_user.id).all()
+
+    return render_template('sponsor/edit_ad_request.html', title='Edit Ad Request', form=form, ad_request=ad_request, influencers=influencers, campaigns=campaigns)
+
+
 
 # Ad Request Delete Route
 

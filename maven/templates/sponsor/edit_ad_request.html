@@ -14,34 +14,21 @@
 {% endblock script %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h1>Edit Ad Request</h1>
-        <form method="POST" action="{{ url_for('sponsor.edit_ad_request', ad_request_id=ad_request.id) }}">
-            {{ form.hidden_tag() }}
+<div class="container mt-5">
+    <br>
+    <h1 class="text-center">Edit Ad Request</h1>
+    <br>
+    <form method="POST" action="{{ url_for('sponsor.edit_ad_request', ad_request_id=ad_request.id) }}" class="row g-3">
+        {{ form.hidden_tag() }}
             
-            <div class="mb-3">
-                {{ form.campaign_id.label(class="form-label") }}
-                {{ form.campaign_id(class="form-control", placeholder="Enter campaign ID") }}
-                {% if form.campaign_id.errors %}
-                    <div class="alert alert-danger mt-2">
-                        {% for error in form.campaign_id.errors %}
-                            <span>{{ error }}</span><br>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <div class="mb-3">
-                {{ form.influencer_id.label(class="form-label") }}
-                {{ form.influencer_id(class="form-control", placeholder="Enter influencer ID") }}
-                {% if form.influencer_id.errors %}
-                    <div class="alert alert-danger mt-2">
-                        {% for error in form.influencer_id.errors %}
-                            <span>{{ error }}</span><br>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
+        <div class="form-group">
+            <label for="campaign_id">Campaign ID</label>
+            <input type="text" class="form-control" id="campaign_id" value="{{ ad_request.campaign_id }}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="influencer_id">Influencer ID</label>
+            <input type="text" class="form-control" id="influencer_id" value="{{ ad_request.influencer_id }}" readonly>
+        </div>
             
             <div class="mb-3">
                 {{ form.messages.label(class="form-label") }}

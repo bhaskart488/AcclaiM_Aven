@@ -51,9 +51,9 @@
                     
                 </div>
                 <div class="progress" role="progressbar" aria-label="Campaign Progress" aria-valuenow="{{ campaign.campaign_progress() * 100 }}" aria-valuemin="0.00" aria-valuemax="100.00">
-                    <div class="progress-bar progress-bar-striped progress-bar-animate" style="width: {{ campaign.campaign_progress() * 100 }}%">{{ campaign.campaign_progress() * 100 }}%</div>
+                    <div class="progress-bar progress-bar-striped progress-bar-animate" style="width: {{ campaign.campaign_progress() * 100 }}%">{{ '%.2f' % (campaign.campaign_progress() * 100) }}%</div>
                 </div>
-                    
+                <br>   
             {% endfor %}
         </div>
     {% else %}

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, SubmitField, SelectField, DecimalField, TextAreaField, IntegerField, DateField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, DecimalField, TextAreaField, IntegerField, DateField, HiddenField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, InputRequired, NumberRange, Optional
 from flask_login import current_user
 from maven.models import User
@@ -52,8 +52,8 @@ class CampaignForm(FlaskForm):
 
 
 class AdRequestForm(FlaskForm):
-    campaign_id = IntegerField('Campaign ID', validators=[DataRequired()])
-    influencer_id = IntegerField('Influencer ID', validators=[DataRequired()])
+    campaign_id = IntegerField('Campaign', validators=[DataRequired()])
+    influencer_id = IntegerField('Influencer', validators=[DataRequired()])
     messages = TextAreaField('Messages', validators=[DataRequired()])
     requirements = TextAreaField('Requirements', validators=[DataRequired()])
     offer_amount = DecimalField('Offer Amount', validators=[DataRequired(), NumberRange(min=0)])
@@ -65,6 +65,15 @@ class AdRequestForm(FlaskForm):
         super(AdRequestForm, self).__init__(*args, **kwargs)
         if 'campaign_id' in kwargs:
             self.campaign_id.data = kwargs['campaign_id']
+
+
+class AdRequestEditForm(FlaskForm):
+    campaign_id = HiddenField('Campaign ID')
+    influencer_id = HiddenField('Influencer ID')
+    messages = TextAreaField('Messages', validators=[DataRequired()])
+    requirements = TextAreaField('Requirements', validators=[DataRequired()])
+    status = SelectField('Status', choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected'), ('Negotiation', 'Negotiation')], validators=[DataRequired()])
+    offer_amount = DecimalField('Offer Amount', validators=[DataRequired()])
 
 
 class NegotiateForm(FlaskForm):

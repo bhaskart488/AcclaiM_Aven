@@ -2,19 +2,31 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1>Create Ad Request</h1>
-    <form method="POST" action="{{ url_for('sponsor.create_ad_request', campaign_id=campaign_id) }}">
+    <br>
+    <h1 class="text-center">Create Ad Request</h1>
+    <br>
+    <form method="POST" action="{{ url_for('sponsor.create_ad_request', campaign_id=campaign_id) }}" class="row g-3">
         {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.campaign_id.label(class="form-control-label") }}
-            {{ form.campaign_id(value=campaign_id, class="form-control", class="is-invalid" if form.campaign_id.errors else "") }}
+        
+        <div class="col-md-6">
+            {{ form.campaign_id.label(class="form-label") }}
+            <select class="form-select" name="campaign_id">
+            {% for campaign in campaigns %}
+            {% if campaign.id == campaign_id %}
+                <option value="{{ campaign.id }}" selected>{{ campaign.name }}</option>
+            {% else %}
+                <option value="{{ campaign.id }}">{{ campaign.name }}</option>
+            {% endif %}
+            {% endfor %}
+            </select>
             {% for error in form.campaign_id.errors %}
             <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
         </div>
-        <div class="form-group">
-            {{ form.influencer_id.label(class="form-control-label") }}
-            <select class="form-control" name="influencer_id">
+        
+        <div class="col-md-6">
+            {{ form.influencer_id.label(class="form-label") }}
+            <select class="form-select" name="influencer_id">
             {% for influencer in influencers %}
             <option value="{{ influencer.id }}">{{ influencer.full_name }}</option>
             {% endfor %}
@@ -23,38 +35,44 @@
             <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
         </div>
-      
-        <div class="form-group">
-            {{ form.messages.label(class="form-control-label") }}
-            {{ form.messages(class="form-control", class="is-invalid" if form.messages.errors else "") }}
-            {% for error in form.messages.errors %}
-                <div class="invalid-feedback">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.requirements.label(class="form-control-label") }}
-            {{ form.requirements(class="form-control", class="is-invalid" if form.requirements.errors else "") }}
-            {% for error in form.requirements.errors %}
-                <div class="invalid-feedback">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.status.label(class="form-control-label") }}
+        
+        
+                <div class="col-12">
+                    {{ form.messages.label(class="form-label") }}
+                    {{ form.messages(class="form-control", class="is-invalid" if form.messages.errors else "") }}
+                    {% for error in form.messages.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="col-12">
+                    {{ form.requirements.label(class="form-label") }}
+                    {{ form.requirements(class="form-control", class="is-invalid" if form.requirements.errors else "") }}
+                    {% for error in form.requirements.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+         
+        <div class="col-md-4">
+            {{ form.status.label(class="form-label") }}
             {{ form.status(class="form-control", class="is-invalid" if form.status.errors else "") }}
             {% for error in form.status.errors %}
-                <div class="invalid-feedback">{{ error }}</div>
+            <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
         </div>
-        <div class="form-group">
-            {{ form.offer_amount.label(class="form-control-label") }}
+        
+        <div class="col-md-8">
+            {{ form.offer_amount.label(class="form-label") }}
             {{ form.offer_amount(class="form-control", class="is-invalid" if form.offer_amount.errors else "") }}
             {% for error in form.offer_amount.errors %}
-                <div class="invalid-feedback">{{ error }}</div>
+            <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
         </div>
-        <button type="submit" class="btn btn-primary">Create</button>
-        <a href="{{ url_for('sponsor.manage_ad_requests', campaign_id=campaign_id) }}" class="btn btn-secondary">Cancel</a>
-
+        
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a href="{{ url_for('sponsor.manage_ad_requests', campaign_id=campaign_id) }}" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>
 {% endblock %}
