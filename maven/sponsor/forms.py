@@ -86,3 +86,14 @@ class InfluencerSearchForm(FlaskForm):
     niche = SelectField('Niche', choices=[('', 'Select Niche'), ('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food'), ('travel', 'Travel'), ('fitness', 'Fitness'), ('music', 'Music'), ('art', 'Art'), ('health', 'Health'), ('beauty', 'Beauty'), ('sports', 'Sports')], validators=[Optional()])
     search_text = StringField('Name', validators=[Optional()])
     submit = SubmitField('Search')
+
+
+# Payment Form
+
+class PaymentForm(FlaskForm):
+    card_number = StringField('Card Number', validators=[DataRequired()])
+    card_holder_name = StringField('Card Holder Name', validators=[DataRequired()])
+    expiry_date = StringField('Expiry Date (MM/YY)', validators=[DataRequired()])
+    cvv = StringField('CVV', validators=[DataRequired()])
+    amount = DecimalField('Amount', validators=[DataRequired(), NumberRange(min=0)])
+    submit = SubmitField('Pay')

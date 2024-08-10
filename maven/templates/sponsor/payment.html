@@ -1,0 +1,76 @@
+{% extends 'main/layout.html' %}
+
+
+
+
+{% block content %}
+<div class="container">
+  <main>
+    <div class="py-5 text-center">
+      <img class="d-block mx-auto mb-4" src="{{ url_for('static', filename='img/icons/android-chrome-192x192.png') }}" alt="" width="72" height="57">
+      <h2>Payment Form</h2>
+      <p class="lead">Please enter your payment details below to complete the ad request.</p>
+    </div>
+
+    <div class="row g-5">
+      <div class="col-md-7 col-lg-8">
+        <h4 class="mb-3">Payment Details</h4>
+        <form method="POST" class="needs-validation" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="cc-name" class="form-label">Name on card</label>
+              {{ form.card_holder_name(class="form-control", id="cc-name", placeholder="", required=True) }}
+              <small class="text-muted">Full name as displayed on card</small>
+              <div class="invalid-feedback">
+                Name on card is required
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="cc-number" class="form-label">Credit card number</label>
+              {{ form.card_number(class="form-control", id="cc-number", placeholder="", required=True) }}
+              <div class="invalid-feedback">
+                Credit card number is required
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <label for="cc-expiration" class="form-label">Expiration</label>
+              {{ form.expiry_date(class="form-control", id="cc-expiration", placeholder="", required=True) }}
+              <div class="invalid-feedback">
+                Expiration date required
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <label for="cc-cvv" class="form-label">CVV</label>
+              {{ form.cvv(class="form-control", id="cc-cvv", placeholder="", required=True) }}
+              <div class="invalid-feedback">
+                Security code required
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="amount" class="form-label">Amount</label>
+              {{ form.amount(class="form-control", id="amount", placeholder="", required=True) }}
+              <div class="invalid-feedback">
+                Amount is required
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          {{ form.submit(class="w-100 btn btn-primary btn-lg") }}
+        </form>
+      </div>
+    </div>
+  </main>
+
+  
+<script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+<script src="form-validation.js"></script>
+
+</div>
+{% endblock content %}

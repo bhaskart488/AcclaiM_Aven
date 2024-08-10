@@ -3,7 +3,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_user, current_user, logout_user, login_required
 from maven import db
 from maven.models import User, Sponsor, Campaign, AdRequest, Influencer, Notification
-from maven.sponsor.forms import SponsorForm, CampaignForm, AdRequestForm, InfluencerSearchForm, AdRequestEditForm
+from maven.sponsor.forms import SponsorForm, CampaignForm, AdRequestForm, InfluencerSearchForm, AdRequestEditForm, PaymentForm
 from werkzeug.utils import secure_filename
 import requests
 from datetime import datetime, timezone
@@ -567,6 +567,28 @@ def all_ad_requests():
 
     )
     return render_template('sponsor/all_ad_requests.html', ad_requests=ad_requests, title='All Ad Requests')
+
+
+# Ad Request Payment Route
+
+@sponsor.route('/ad_requests/<int:ad_request_id>/payment', methods=['GET', 'POST'])
+def make_payment(ad_request_id):
+    form = PaymentForm()
+    if form.validate_on_submit():
+        # Dummy payment processing logic
+        # Dummy payment processing logic
+        # payment_amount = form.amount.data
+        # payment_method = form.payment_method.data
+        # Process the payment using the specified payment method and amount
+        # You can add your own logic here, such as connecting to a payment gateway or updating a database
+        # Once the payment is processed successfully, you can redirect the user to a success page
+        # If the payment fails, you can display an error message to the user
+        flash('Payment successful', 'success')
+        return redirect(url_for('sponsor.all_ad_requests'))
+    
+    return render_template('sponsor/payment.html', title='Make Payment', form=form, ad_request_id=ad_request_id)
+
+
 # ----------------------
 
 # notification routes

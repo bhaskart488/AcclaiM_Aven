@@ -49,6 +49,7 @@
                     </div>
                     <div class="btn-group" role="group" aria-label="Ad Request Actions">
                         <a href="{{ url_for('sponsor.edit_ad_request', ad_request_id=ad_request.id) }}" class="btn btn-secondary">Edit</a>
+                        <a href="{{ url_for('sponsor.make_payment', ad_request_id=ad_request.id) }}" class="btn btn-success">Pay</a>
                         {{ form.hidden_tag() }}
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAdRequestModal" data-ad-request-id="{{ ad_request.id }}">Delete</button>
                     </div>
