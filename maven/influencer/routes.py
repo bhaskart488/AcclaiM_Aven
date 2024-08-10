@@ -358,3 +358,59 @@ def search_campaigns():
     return render_template('influencer/search_results.html', form=form, campaigns=campaigns, industry=industry, budget=budget, sponsor_name=sponsor_name)
 
 # edit the user_id, sponsor_id mismatch.
+
+
+# analytics
+from flask import render_template
+from flask_login import current_user
+from maven.models import AdRequest, Campaign
+from maven import db
+
+@influencer.route('/influencer/analytics')
+@login_required
+def influencer_analytics():
+    influencer_id = current_user.id
+
+    # Query for total ad requests
+    total_ad_requests = AdRequest.query.filter_by(influencer_id=influencer_id).count()
+
+    # Query for complete and incomplete ad requests
+    complete_ad_requests = AdRequest.query.filter_by(influencer_id=influencer_id, completion_status='Complete').count()
+    incomplete_ad_requests = AdRequest.query.filter_by(influencer_id=influencer_id, completion_status='Incomplete').count()
+
+    # Query for ad request statuses
+    ad_request_statuses = db.session.query(
+        AdRequest.status, db.func.count(AdRequest.id)
+    ).filter_by(influencer_id=influencer_id).group_by(AdRequest.status).all()
+
+    # Query for ad request completion status
+    ad_request_completion_status = db.session.query(
+        AdRequest.completion_status, db.func.count(AdRequest.id)
+    ).filter_by(influencer_id=influencer_id).group_by(AdRequest.completion_status).all()
+
+    # Query for offer amount per ad request
+    offer_amounts = db.session.query(
+        AdRequest.id, AdRequest.offer_amount
+    ).filter_by(influencer_id=influencer_id).all()
+
+    # Query for earnings from each campaign
+    campaign_earnings = db.session.query(
+        Campaign.name, db.func.sum(AdRequest.offer_amount)
+    ).join(AdRequest).filter(AdRequest.influencer_id == influencer_id).group_by(Campaign.name).all()
+
+    # Calculate total earnings
+    total_earnings = sum([earning[1] for earning in campaign_earnings])
+
+    data = {
+
+        'total_ad_requests': total_ad_requests,
+        'complete_ad_requests': complete_ad_requests,
+        'incomplete_ad_requests': incomplete_ad_requests,
+        'ad_request_statuses': list(ad_request_statuses),
+        'ad_request_completion_status': list(ad_request_completion_status),
+        'offer_amounts': list(offer_amounts),
+        'campaign_earnings': list(campaign_earnings),
+        'total_earnings': total_earnings
+    }
+
+    return render_template('influencer/analytics.html', data=data)

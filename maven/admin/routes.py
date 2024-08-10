@@ -108,19 +108,30 @@ def unflag_campaign(campaign_id):
 def search_campaigns():
     form = CampaignSearchForm()
     campaigns = []
+    industry = None
+    budget = None
+    sponsor_name = None
+
     if form.validate_on_submit():
-        name = form.name.data
+        industry = form.industry.data
+        budget = form.budget.data
+        sponsor_name = form.sponsor_name.data
         visibility = form.visibility.data
 
-        query = Campaign.query
-        if name:
-            query = query.filter(Campaign.name.ilike(f'%{name}%'))
+        query = Campaign.query.join(Sponsor, Sponsor.user_id == Campaign.sponsor_id).filter(
+            Campaign.visibility == 'public'
+        )
         if visibility:
             query = query.filter(Campaign.visibility == visibility)
+        if industry:
+            query = query.filter(Sponsor.industry == industry)
+        if budget:
+            query = query.filter(Campaign.budget <= budget)
+        if sponsor_name:
+            query = query.filter(Sponsor.full_name.ilike(f'%{sponsor_name}%'))
+        campaigns = query.add_columns(Sponsor.full_name, Sponsor.website).all()
 
-        campaigns = query.all()
-
-    return render_template('admin/search_campaigns.html', form=form, campaigns=campaigns)
+    return render_template('admin/search_campaigns.html', form=form, campaigns=campaigns, industry=industry, budget=budget, sponsor_name=sponsor_name)
 
     
 
@@ -188,3 +199,68 @@ def view_user(user_id):
         return redirect(url_for('influencer.profile', user_id=user.id))
     else:
         abort(404)
+
+
+#analytics
+
+
+@admin.route('/admin/analytics')
+@login_required
+def admin_analytics():
+    # Query for ad request statuses
+    ad_request_statuses = db.session.query(
+        AdRequest.status, db.func.count(AdRequest.id)
+    ).group_by(AdRequest.status).all()
+
+    # Query for ad request completion statuses
+    ad_request_completion_statuses = db.session.query(
+        AdRequest.completion_status, db.func.count(AdRequest.id)
+    ).group_by(AdRequest.completion_status).all()
+
+    # Query for offer amount sum per campaign
+    offer_amounts = db.session.query(
+        Campaign.name, db.func.sum(AdRequest.offer_amount)
+    ).join(AdRequest).group_by(Campaign.name).all()
+
+    # Query for campaign progress
+    campaigns = Campaign.query.all()
+    campaign_progress = [(campaign.name, campaign.campaign_progress()*100) for campaign in campaigns]
+
+    # Query for campaign start and end dates
+    campaign_dates = db.session.query(
+        Campaign.name, Campaign.start_date, Campaign.end_date
+    ).all()
+
+    # Query for total budget of all sponsors
+    total_sponsor_budget = db.session.query(db.func.sum(Sponsor.budget)).scalar()
+
+    # Query for number of public and private campaigns
+    public_campaigns_count = Campaign.query.filter_by(visibility='public').count()
+    private_campaigns_count = Campaign.query.filter_by(visibility='private').count()
+
+    # Query for budget of each campaign
+    campaign_budgets = db.session.query(
+        Campaign.name, Campaign.budget
+    ).all()
+
+    # Query for total earnings of all influencers
+    total_earnings = db.session.query(db.func.sum(AdRequest.offer_amount)).scalar()
+
+    data = {
+        'ad_request_statuses': list(ad_request_statuses),
+        'ad_request_completion_statuses': list(ad_request_completion_statuses),
+        'offer_amounts': list(offer_amounts),
+        'campaign_progress': list(campaign_progress),
+        'campaign_dates': list(campaign_dates),
+        'total_sponsor_budget': total_sponsor_budget,
+        'public_campaigns_count': public_campaigns_count,
+        'private_campaigns_count': private_campaigns_count,
+        'campaign_budgets': list(campaign_budgets),
+        'total_earnings': total_earnings,
+        'campaign_visibility': {
+            'public': public_campaigns_count,
+            'private': private_campaigns_count
+        }
+    }
+
+    return render_template('admin/analytics.html', data=data)

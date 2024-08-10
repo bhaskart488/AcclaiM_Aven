@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-bs-theme="dark" lang="en">
+<html data-bs-theme="light" lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -14,12 +14,16 @@
     <meta name="description" content="It's a platform to connect Sponsors and Influencers so that sponsors can get their product/service advertised and influencers can get monetary benefit.">
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
     
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icons/favicon.ico') }}">
+
+
     <!-- Correct paths for CSS and JS files -->
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
     
     <!-- <link rel="stylesheet" href="static/css/Profile-with-data-and-skills.css"> -->
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/Profile-with-data-and-skills.css') }}"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     {% block script %} {% endblock script %}
 </head>
@@ -35,26 +39,31 @@
             <ul class="navbar-nav mx-auto">
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'admin' %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.search_users') }}">Users</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.search_campaigns') }}">Campaigns</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.search_users') }}"><i class="fa fa-users" aria-hidden="true"></i> Users</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.search_campaigns') }}"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Campaigns</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.admin_analytics') }}"><i class="fa fa-bar-chart" aria-hidden="true"></i> Stats</a></li>
+
                         <!-- Add more admin-specific links here -->
                     {% elif current_user.role == 'influencer' %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.dashboard') }}">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.view_requests') }}">Requests</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.search_campaigns') }}">Search</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.dashboard') }}"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.view_requests') }}"><i class="fa fa-envelope" aria-hidden="true"></i> Requests</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.search_campaigns') }}"><i class="fa fa-fw fa-search"></i>Search</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('influencer.influencer_analytics') }}"><i class="fa fa-bar-chart" aria-hidden="true"></i> Stats</a></li>
+
                         <!-- Add more influencer-specific links here -->
                     {% elif current_user.role == 'sponsor' %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.dashboard') }}">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.manage_campaigns') }}">Campaigns</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.all_ad_requests') }}">Ads</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.search_influencers') }}">Search</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.dashboard') }}"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.manage_campaigns') }}"><i class="fa fa-book" aria-hidden="true"></i> Campaigns</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.all_ad_requests') }}">My Ads</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.search_influencers') }}"><i class="fa fa-fw fa-search"></i> Search</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('sponsor.sponsor_analytics') }}"><i class="fa fa-bar-chart" aria-hidden="true"></i> Stats</a></li>
                         <!-- Add more sponsor-specific links here -->
                     {% endif %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.notifications') }}">Notifications ({{ current_user.unread_notifications_count }})</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.notifications') }}"><i class="fa fa-bell" aria-hidden="true"></i> ({{ current_user.unread_notifications_count }})</a></li>
                 {% else %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.pricing') }}">Pricing</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.contacts') }}">Contacts</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.contacts') }}">Contact Us</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Log in</a></li>
                 {% endif %}
             </ul>

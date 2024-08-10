@@ -631,45 +631,6 @@ def search_influencers():
 
 # analytics routes
 
-# @sponsor.route('/sponsor/analytics')
-# @login_required
-# def sponsor_analytics():
-#     sponsor_id = current_user.id
-
-#     # Query for ad request statuses
-#     ad_request_statuses = db.session.query(
-#         AdRequest.status, db.func.count(AdRequest.id)
-#     ).join(Campaign).filter(Campaign.sponsor_id == sponsor_id).group_by(AdRequest.status).all()
-
-#     # Query for ad request completion statuses
-#     ad_request_completion_statuses = db.session.query(
-#         AdRequest.completion_status, db.func.count(AdRequest.id)
-#     ).join(Campaign).filter(Campaign.sponsor_id == sponsor_id).group_by(AdRequest.completion_status).all()
-
-#     # Query for offer amount sum per campaign
-#     offer_amounts = db.session.query(
-#         Campaign.name, db.func.sum(AdRequest.offer_amount)
-#     ).join(AdRequest).filter(Campaign.sponsor_id == sponsor_id).group_by(Campaign.name).all()
-
-#     # Query for campaign progress
-#     campaigns = Campaign.query.filter_by(sponsor_id=sponsor_id).all()
-#     campaign_progress = [(campaign.name, campaign.campaign_progress()*100) for campaign in campaigns]
-
-#     # Query for campaign start and end dates
-#     campaign_dates = db.session.query(
-#         Campaign.name, Campaign.start_date, Campaign.end_date
-#     ).filter(Campaign.sponsor_id == sponsor_id).all()
-
-#     data = {
-#         'ad_request_statuses': list(ad_request_statuses),
-#         'ad_request_completion_statuses': list(ad_request_completion_statuses),
-#         'offer_amounts': list(offer_amounts),
-#         'campaign_progress': list(campaign_progress),
-#         'campaign_dates': list(campaign_dates)
-#     }
-
-#     return render_template('sponsor/analytics.html', data=data)
-
 
 @sponsor.route('/sponsor/analytics')
 @login_required

@@ -16,7 +16,7 @@
         </div>
         <div class="card-footer text-right">
             <form method="POST">
-                <button type="submit" class="btn btn-primary">Ad Request</button>
+                <button type="submit" class="btn btn-primary" {% if current_user.role == 'admin' %}disabled{% endif %}>Ad Request</button>
             </form>
         </div>
     </div>

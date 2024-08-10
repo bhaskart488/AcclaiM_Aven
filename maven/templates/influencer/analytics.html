@@ -1,0 +1,97 @@
+{% extends 'main/layout.html' %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock script %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-3">Analytics</h1>
+    <h4>Total Earnings: {{ data.total_earnings }}</h4>
+    <h4>Total Ad Requests: {{ data.total_ad_requests }}</h4>
+    <div class="row">
+        <div class="col">
+            <p>Completed: {{ data.complete_ad_requests }}</p>
+        </div>
+        <div class="col">
+            <p>Incomplete: {{ data.incomplete_ad_requests }}</p>
+        </div>
+    </div>
+
+    <div class="row row-cols-2 gy-5">
+        <div class="col">
+            <h3>Ad Requests Completion</h3>
+            <canvas id="adRequestsCompletionChart"></canvas>
+        </div>
+        <div class="col">
+            <h3>Ad Request Statuses</h3>
+            <canvas id="adRequestStatusChart"></canvas>
+        </div>
+    
+        <div class="col">
+            <h3>Offer Amounts</h3>
+            <canvas id="offerAmountsChart"></canvas>
+        </div>
+        <div class="col">
+            <h3>Campaign Earnings</h3>
+            <canvas id="campaignEarningsChart"></canvas>
+        </div>
+    
+</div>
+
+<script>
+    // Ad Requests Completion Chart
+    const adRequestsCompletionCtx = document.getElementById('adRequestsCompletionChart').getContext('2d');
+    const adRequestsCompletionChart = new Chart(adRequestsCompletionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ data.ad_request_completion_status|map(attribute=0)|list|tojson }},
+            datasets: [{
+                data: {{ data.ad_request_completion_status|map(attribute=1)|list|tojson }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            }]
+        }
+    });
+
+
+    // Ad Request Status Chart
+    const adRequestStatusCtx = document.getElementById('adRequestStatusChart').getContext('2d');
+    const adRequestStatusChart = new Chart(adRequestStatusCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ data.ad_request_statuses|map(attribute=0)|list|tojson }},
+            datasets: [{
+                data: {{ data.ad_request_statuses|map(attribute=1)|list|tojson }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            }]
+        }
+    });
+
+    // Offer Amounts Chart
+    const offerAmountsCtx = document.getElementById('offerAmountsChart').getContext('2d');
+    const offerAmountsChart = new Chart(offerAmountsCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ data.offer_amounts|map(attribute=0)|list|tojson }},
+            datasets: [{
+                label: 'Offer Amount',
+                data: {{ data.offer_amounts|map(attribute=1)|list|tojson }},
+                backgroundColor: '#36A2EB'
+            }]
+        }
+    });
+
+    // Campaign Earnings Chart
+    const campaignEarningsCtx = document.getElementById('campaignEarningsChart').getContext('2d');
+    const campaignEarningsChart = new Chart(campaignEarningsCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ data.campaign_earnings|map(attribute=0)|list|tojson }},
+            datasets: [{
+                data: {{ data.campaign_earnings|map(attribute=1)|list|tojson }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+            }]
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends 'main/layout.html' %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock script %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Admin Analytics</h1>
+    <h4>Total Earnings across all influencers: {{ data.total_earnings }}</h4>
+    <h4>Total Budget across all sponsors: {{ data.total_sponsor_budget }}</h4>
+    <br>
+    <div class="row row-col gy-5">
+        <div class="col">
+            <h3>Ad Requests Status</h3>
+            <canvas id="adRequestStatusChart"></canvas>
+        </div>
+        <div class="col">
+            <h3>Ad Requests Completion Status</h3>
+            <canvas id="adRequestCompletionStatusChart"></canvas>
+        </div>
+    </div>
+    <br>
+    <div class="row row-col gy-5">
+        <div class="col">
+            <h3>Offer Amounts</h3>
+            <canvas id="offerAmountsChart"></canvas>
+        </div>
+        <div class="col">
+            <h3>Campaign Progress</h3>
+            <canvas id="campaignProgressChart"></canvas>
+        </div>
+    
+        
+    </div>
+    <div class="row gy-5">
+        <div class="col">
+            <canvas id="campaignVisibilityChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Ad Request Status Chart
+    const adRequestStatusCtx = document.getElementById('adRequestStatusChart').getContext('2d');
+    const adRequestStatusChart = new Chart(adRequestStatusCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ data.ad_request_statuses|map(attribute=0)|list|tojson }},
+            datasets: [{
+                data: {{ data.ad_request_statuses|map(attribute=1)|list|tojson }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#cc65fe']
+            }]
+        }
+    });
+
+    // Ad Request Completion Status Chart
+    const adRequestCompletionStatusCtx = document.getElementById('adRequestCompletionStatusChart').getContext('2d');
+    const adRequestCompletionStatusChart = new Chart(adRequestCompletionStatusCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ data.ad_request_completion_statuses|map(attribute=0)|list|tojson }},
+            datasets: [{
+                data: {{ data.ad_request_completion_statuses|map(attribute=1)|list|tojson }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            }]
+        }
+    });
+
+    // Offer Amounts Chart
+    const offerAmountsCtx = document.getElementById('offerAmountsChart').getContext('2d');
+    const offerAmountsChart = new Chart(offerAmountsCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ data.offer_amounts|map(attribute=0)|list|tojson }},
+            datasets: [{
+                label: 'Offer Amount',
+                data: {{ data.offer_amounts|map(attribute=1)|list|tojson }},
+                backgroundColor: '#36A2EB'
+            }]
+        }
+    });
+
+    // Campaign Progress Chart
+    const campaignProgressCtx = document.getElementById('campaignProgressChart').getContext('2d');
+    const campaignProgressChart = new Chart(campaignProgressCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ data.campaign_progress|map(attribute=0)|list|tojson }},
+            datasets: [{
+                label: 'Progress (%)',
+                data: {{ data.campaign_progress|map(attribute=1)|list|tojson }},
+                backgroundColor: '#FF6384'
+            }]
+        }
+    });
+
+    // Campaign Dates Chart
+    const campaignDatesCtx = document.getElementById('campaignDatesChart').getContext('2d');
+    const campaignDatesChart = new Chart(campaignDatesCtx, {
+        type: 'line',
+        data: {
+            labels: {{ data.campaign_dates|map(attribute=0)|list|tojson }},
+            datasets: [{
+                label: 'Campaign Dates',
+                data: {{ data.campaign_dates|map(attribute=1)|list|tojson }},
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Campaign Visibility Chart
+    const campaignVisibilityCtx = document.getElementById('campaignVisibilityChart').getContext('2d');
+    const campaignVisibilityChart = new Chart(campaignVisibilityCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Public Campaigns', 'Private Campaigns'],
+            datasets: [{
+                data: {{ data.campaign_visibility|map(attribute=1)|list|tojson }},
+                backgroundColor: ['#FF6384', '#36A2EB']
+            }]
+        }
+    });
+
+    // Campaign Budgets Chart
+    const campaignBudgetsCtx = document.getElementById('campaignBudgetsChart').getContext('2d');
+    const campaignBudgetsChart = new Chart(campaignBudgetsCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ data.campaign_budgets|map(attribute=0)|list|tojson }},
+            datasets: [{
+                label: 'Budget',
+                data: {{ data.campaign_budgets|map(attribute=1)|list|tojson }},
+                backgroundColor: '#36A2EB'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock content %}
+            

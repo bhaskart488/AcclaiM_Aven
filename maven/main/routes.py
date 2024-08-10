@@ -16,7 +16,7 @@ def pricing():
 
 @main.route("/contacts")
 def contacts():    
-    return render_template('main/contacts.html', title='Contacts')
+    return render_template('main/contacts.html', title='Contact Us')
 
 @main.route("/notifications")
 @login_required

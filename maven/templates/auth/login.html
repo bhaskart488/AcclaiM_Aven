@@ -42,10 +42,11 @@
                         </div>
                         <div class="mb-5">
                             {{ form.submit(class="btn btn-primary shadow") }}
+                            <small class="text-muted">
+                                <a href="#">Forgot your password?</a>
+                            </small>
                         </div>
-                        <small class="text-muted">
-                            <a href="{{ url_for('auth.forgot_password') }}">Forgot your password?</a>
-                        </small>
+                        
                     </form>
                 </div>
             </div>
