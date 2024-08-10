@@ -1,0 +1,187 @@
+{% extends 'main/layout.html' %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock script %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-3">Analytics</h1>
+    <!-- Sponsor Budget -->
+    <h4>Sponsor Budget: {{ data.sponsor_budget }}</h4>
+
+    <!-- Public and Private Campaigns Count -->
+    <p>Public Campaigns: {{ data.public_campaigns_count }}</p>
+    <p>Private Campaigns: {{ data.private_campaigns_count }}</p>
+
+    <div class="container text-center">
+        <div class="row row-cols-2 gy-5">
+          <div class="col">
+            <!-- Ad Request Status Chart -->
+            <h3>Ads Status</h3>
+            <canvas id="adRequestStatusChart"></canvas>
+          </div>
+          <div class="col">
+            <!-- Ad Request Completion Status Chart -->
+            <h3>Ads Completion Status</h3>
+            <canvas id="adRequestCompletionStatusChart"></canvas>
+          </div>
+          <div class="col">
+            <!-- Offer Amount Sum Chart -->
+            <h3>Total Offer Amount</h3>
+            <canvas id="offerAmountChart"></canvas>
+          </div>
+          <div class="col">
+            <!-- Campaign Progress Chart -->
+            <h3>Campaign Progress % </h3>
+            <canvas id="campaignProgressChart"></canvas>
+          </div>
+        </div>
+        <br>
+        <div class="row gy-5">
+            <div class="col">
+                <!-- Campaign Duration Chart -->
+                <h3>Campaign Duration</h3>
+                <canvas id="campaignDurationChart"></canvas>
+            </div>
+            <div class="col">
+                <!-- Campaign Budgets Chart -->
+                <h3>Campaign Budgets</h3>
+                <canvas id="campaignBudgetsChart"></canvas>
+            </div>
+        </div>
+        
+
+    </div>
+    
+</div>
+    <script>
+        // Ad Request Status Chart
+        const adRequestStatusCtx = document.getElementById('adRequestStatusChart').getContext('2d');
+        const adRequestStatusChart = new Chart(adRequestStatusCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ data.ad_request_statuses|map(attribute=0)|list|tojson }},
+                datasets: [{
+                    data: {{ data.ad_request_statuses|map(attribute=1)|list|tojson }},
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                }]
+            }
+        });
+
+        // Ad Request Completion Status Chart
+        const adRequestCompletionStatusCtx = document.getElementById('adRequestCompletionStatusChart').getContext('2d');
+        const adRequestCompletionStatusChart = new Chart(adRequestCompletionStatusCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ data.ad_request_completion_statuses|map(attribute=0)|list|tojson }},
+                datasets: [{
+                    data: {{ data.ad_request_completion_statuses|map(attribute=1)|list|tojson }},
+                    backgroundColor: ['#FF6384', '#36A2EB']
+                }]
+            }
+        });
+
+        // Offer Amount Sum Chart
+        const offerAmountCtx = document.getElementById('offerAmountChart').getContext('2d');
+        const offerAmountChart = new Chart(offerAmountCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ data.offer_amounts|map(attribute=0)|list|tojson }},
+                datasets: [{
+                    label: 'Offer Amount',
+                    data: {{ data.offer_amounts|map(attribute=1)|list|tojson }},
+                    backgroundColor: '#36A2EB'
+                }]
+            }
+        });
+
+        // Campaign Progress Chart
+        const campaignProgressCtx = document.getElementById('campaignProgressChart').getContext('2d');
+        const campaignProgressChart = new Chart(campaignProgressCtx, {
+            type: 'bar',
+            data: {
+            labels: {{ data.campaign_progress|map(attribute=0)|list|tojson }},
+            datasets: [{
+                label: 'Progress',
+                data: {{ data.campaign_progress|map(attribute=1)|list|tojson }},
+                backgroundColor: '#FFCE56'
+            }]
+            },
+            options: {
+            scales: {
+                y: {
+                beginAtZero: true,
+                max: 100
+                }
+            }
+            }
+        });
+
+        
+
+        // Campaign Dates Chart
+    // Campaign Dates Chart
+    const campaignDates = {{ data.campaign_dates|map(attribute=0)|list|tojson }};
+    console.log(campaignDates);
+
+        // Campaign Budgets Chart
+        const campaignBudgetsCtx = document.getElementById('campaignBudgetsChart').getContext('2d');
+        const campaignBudgetsChart = new Chart(campaignBudgetsCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ data.campaign_budgets|map(attribute=0)|list|tojson }},
+                datasets: [{
+                    label: 'Budget',
+                    data: {{ data.campaign_budgets|map(attribute=1)|list|tojson }},
+                    backgroundColor: '#36A2EB'
+                }]
+            }
+        });
+    
+
+    // Calculate campaign durations
+    const campaignDurations = {{ data.campaign_dates|map(attribute=2)|list|tojson }}.map((endDate, index) => {
+        const startDate = new Date({{ data.campaign_dates|map(attribute=1)|list|tojson }}[index]);
+        const endDateObj = new Date(endDate);
+        const duration = (endDateObj - startDate) / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+        return duration;
+    });
+
+    // Campaign Duration Chart
+    const campaignDurationCtx = document.getElementById('campaignDurationChart').getContext('2d');
+    const campaignDurationChart = new Chart(campaignDurationCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ data.campaign_dates|map(attribute=0)|list|tojson }}, // Campaign names or identifiers
+            datasets: [{
+                label: 'Duration (days)',
+                data: campaignDurations,
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Duration (days)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Campaign'
+                    }
+                }
+            }
+        }
+    });
+    
+
+</script>
+    
+{% endblock content %}
