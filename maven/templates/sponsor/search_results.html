@@ -45,12 +45,14 @@
             <div>
                 <h5 class="mb-1">{{ influencer.full_name }}</h5>
                 <p class="mb-1">{{ influencer.category }} - {{ influencer.niche }}</p>
+                <p class="mb-1"><i class="fa fa-instagram" aria-hidden="true"> </i> {{ influencer.instagram_followers }}   <i class="fa fa-twitter" aria-hidden="true"></i> {{ influencer.twitter_followers }}</p>
             </div>  
             <div class="btn-group" role="group" aria-label="Search Actions">
                 <a href="{{ url_for('influencer.profile', user_id=influencer.user_id) }}" class="btn btn-primary">View</a>
             </div>
         </div>
         {% endfor %}
+        
         
     {% else %}
         <li>No influencers found.</li>

@@ -632,8 +632,8 @@ def search_influencers():
             query = query.filter(Influencer.niche.ilike(f'%{niche}%'))
         if search_text:
             query = query.filter(Influencer.full_name.ilike(f'%{search_text}%'))
-
-        influencers = query.all()
+        # influencers = query.all()
+        influencers = query.order_by((Influencer.instagram_followers + Influencer.twitter_followers).desc()).all()
 
     return render_template('sponsor/search_results.html', form=form, influencers=influencers)
 
