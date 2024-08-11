@@ -353,7 +353,8 @@ def search_campaigns():
             query = query.filter(Campaign.budget <= budget)
         if sponsor_name:
             query = query.filter(Sponsor.full_name.ilike(f'%{sponsor_name}%'))
-        campaigns = query.add_columns(Sponsor.full_name, Sponsor.website).all()
+        # campaigns = query.add_columns(Sponsor.full_name, Sponsor.website).all()
+        campaigns = query.add_columns(Sponsor.full_name, Sponsor.website).order_by(Campaign.budget.desc()).all()
     
     return render_template('influencer/search_results.html', form=form, campaigns=campaigns, industry=industry, budget=budget, sponsor_name=sponsor_name)
 
