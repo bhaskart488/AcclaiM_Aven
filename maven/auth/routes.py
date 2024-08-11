@@ -98,9 +98,16 @@ def login():
                 'id': response_data['id'],
                 'username': response_data['username'],
                 'email': response_data['email'],
-                'role': response_data['role']
+                'role': response_data['role'],
+                'flagged': response_data['flagged']
             }
             user = User(**user_data)
+
+            #flagged 
+            if user.flagged:
+                flash('Your account has been flagged. Please contact support.', 'danger')
+                return redirect(url_for('auth.login'))
+
             login_user(user, remember=form.remember.data)
             
             next_page = request.args.get('next')

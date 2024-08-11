@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, SelectField, DecimalField, TextAreaField, IntegerField, DateField, HiddenField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, InputRequired, NumberRange, Optional
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, InputRequired, NumberRange, Optional, Regexp
 from flask_login import current_user
 from maven.models import User
 from email_validator import validate_email, EmailNotValidError
@@ -90,10 +90,30 @@ class InfluencerSearchForm(FlaskForm):
 
 # Payment Form
 
+# class PaymentForm(FlaskForm):
+#     card_number = StringField('Card Number', validators=[DataRequired()])
+#     card_holder_name = StringField('Card Holder Name', validators=[DataRequired()])
+#     expiry_date = StringField('Expiry Date (MM/YY)', validators=[DataRequired()])
+#     cvv = StringField('CVV', validators=[DataRequired()])
+#     amount = DecimalField('Amount', validators=[DataRequired(), NumberRange(min=0)])
+#     submit = SubmitField('Pay')
+
 class PaymentForm(FlaskForm):
-    card_number = StringField('Card Number', validators=[DataRequired()])
+    card_number = StringField('Card Number', validators=[
+        DataRequired(),
+        Regexp(r'^\d{16}$', message="Card number must be 16 digits"),
+        Length(min=16, max=16, message="Card number must be 16 digits")
+    ])
     card_holder_name = StringField('Card Holder Name', validators=[DataRequired()])
-    expiry_date = StringField('Expiry Date (MM/YY)', validators=[DataRequired()])
-    cvv = StringField('CVV', validators=[DataRequired()])
+    expiry_date = StringField('Expiry Date (MMYY)', validators=[
+        DataRequired(),
+        Regexp(r'^\d{4}$', message="Expiry date must be 4 digits in MMYY format"),
+        Length(min=4, max=4, message="Expiry date must be 4 digits in MMYY format")
+    ])
+    cvv = StringField('CVV', validators=[
+        DataRequired(),
+        Regexp(r'^\d{3}$', message="CVV must be 3 digits"),
+        Length(min=3, max=3, message="CVV must be 3 digits")
+    ])
     amount = DecimalField('Amount', validators=[DataRequired(), NumberRange(min=0)])
     submit = SubmitField('Pay')

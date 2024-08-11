@@ -1,8 +1,5 @@
 {% extends 'main/layout.html' %}
 
-
-
-
 {% block content %}
 <div class="container">
   <main>
@@ -29,25 +26,25 @@
 
             <div class="col-md-6">
               <label for="cc-number" class="form-label">Credit card number</label>
-              {{ form.card_number(class="form-control", id="cc-number", placeholder="", required=True) }}
+              {{ form.card_number(class="form-control", id="cc-number", placeholder="", required=True, pattern="^\d{16}$") }}
               <div class="invalid-feedback">
-                Credit card number is required
+                Credit card number is required and must be 16 digits
               </div>
             </div>
 
             <div class="col-md-3">
               <label for="cc-expiration" class="form-label">Expiration</label>
-              {{ form.expiry_date(class="form-control", id="cc-expiration", placeholder="", required=True) }}
+              {{ form.expiry_date(class="form-control", id="cc-expiration", placeholder="", required=True, pattern="^\d{4}$") }}
               <div class="invalid-feedback">
-                Expiration date required
+                Expiration date required and must be 4 digits in MMYY format
               </div>
             </div>
 
             <div class="col-md-3">
               <label for="cc-cvv" class="form-label">CVV</label>
-              {{ form.cvv(class="form-control", id="cc-cvv", placeholder="", required=True) }}
+              {{ form.cvv(class="form-control", id="cc-cvv", placeholder="", required=True, pattern="^\d{3}$") }}
               <div class="invalid-feedback">
-                Security code required
+                Security code required and must be 3 digits
               </div>
             </div>
 
@@ -68,9 +65,29 @@
     </div>
   </main>
 
-  
-<script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
-<script src="form-validation.js"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<script>
+
+(function () {
+  'use strict'
+
+  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  var forms = document.querySelectorAll('.needs-validation')
+
+  // Loop over them and prevent submission
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
+</script>
 
 </div>
 {% endblock content %}

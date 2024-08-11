@@ -159,9 +159,9 @@ def profile(user_id):
     # return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
     # Render the profile template with different context based on whether the current user is the owner
     if is_owner:
-        return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor, title='Profile')
+        return render_template('sponsor/profile.html', form=form, sponsor=sponsor, title='Profile')
     else:
-        return render_template('sponsor/profile_visitor.html', title='Profile', sponsor=sponsor)
+        return render_template('sponsor/profile_visitor.html', sponsor=sponsor)
 #         return redirect(url_for('sponsor.profile_visitor', influencer_id=user_id))
     
     
@@ -363,6 +363,13 @@ def manage_ad_requests(campaign_id):
     sponsor_id = current_user.id
     print('campaign_id:', campaign_id, 'sponsor_id:', sponsor_id)
 
+    #flagged
+    campaign = Campaign.query.get_or_404(campaign_id)
+
+    if campaign.flagged:
+        flash('This campaign has been flagged and cannot create ad requests.', 'danger')
+        return redirect(url_for('sponsor.dashboard'))
+
     if request.method == 'POST':
         data = {
             'campaign_id': campaign_id,
@@ -389,7 +396,7 @@ def manage_ad_requests(campaign_id):
     ad_requests = AdRequest.query.join(Campaign).filter(Campaign.sponsor_id == current_user.id, Campaign.id == campaign_id).all()
     print(ad_requests)
     
-    return render_template('sponsor/ad_requests.html', ad_requests=ad_requests, title='Ad Requests', form=form, campaign_id=campaign_id, title='Ad Requests')
+    return render_template('sponsor/ad_requests.html', ad_requests=ad_requests, form=form, campaign_id=campaign_id, title='Ad Requests')
 
 # Ad Request Create Route
 
@@ -398,6 +405,7 @@ def manage_ad_requests(campaign_id):
 def create_ad_request(campaign_id):
     form = AdRequestForm()
     sponsor_id = current_user.id
+
 
     if form.validate_on_submit():
         data = {
@@ -415,7 +423,6 @@ def create_ad_request(campaign_id):
             
             # Send notification to the influencer
             influencer_id = form.influencer_id.data
-            # influencer = Influencer.query.get(influencer_id)
             influencer = Influencer.query.filter_by(id=influencer_id).first()
             print('details influencer: ', influencer, influencer_id)
             # details influencer:  <Influencer Donald Trump> 3 , this 3 is influencer.id not influencer.user_id

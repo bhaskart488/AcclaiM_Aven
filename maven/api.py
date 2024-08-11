@@ -16,6 +16,7 @@ user_fields = {
     'username': fields.String,
     'email': fields.String,
     'role': fields.String,
+    'flagged': fields.Boolean
 }
 
         
@@ -27,12 +28,13 @@ class Register(Resource):
         parser.add_argument('email', type=str, required=True, help="Email cannot be blank")
         parser.add_argument('password', type=str, required=True, help="Password cannot be blank")
         parser.add_argument('role', type=str, required=True, help="Role cannot be blank")
+        parser.add_argument('flagged', type=bool, default=False)
         args = parser.parse_args()
 
         if User.query.filter_by(email=args['email']).first():
             return {'message': 'Email already registered'}, 400
 
-        user = User(username=args['username'], email=args['email'], role=args['role'])
+        user = User(username=args['username'], email=args['email'], role=args['role'], flagged=args['flagged'])
         user.set_password(args['password'])
         db.session.add(user)
         db.session.commit()
@@ -77,7 +79,8 @@ campaign_fields = {
     'budget': fields.Integer,
     'visibility': fields.String,
     'goals': fields.String,
-    'sponsor_id': fields.Integer
+    'sponsor_id': fields.Integer,
+    'flagged': fields.Boolean
 }
 
 
@@ -104,6 +107,7 @@ class CampaignResource(Resource):
         parser.add_argument('visibility', type=str, required=True, help='Visibility is required')
         parser.add_argument('goals', type=str, required=True, help='Goals are required')
         parser.add_argument('sponsor_id', type=int, required=True, help='Sponsor ID is required')
+        parser.add_argument('flagged', type=bool, default=False)
         
         args = parser.parse_args()
 
@@ -122,7 +126,7 @@ class CampaignResource(Resource):
             except ValueError:
                 return {'message': 'Invalid date format, expected YYYY-MM-DD'}, 400
             
-        print("Request data:", args)  # Debugging line
+        # print("Request data:", args)  # Debugging line
 
 
         campaign = Campaign(
@@ -133,11 +137,11 @@ class CampaignResource(Resource):
             budget=args['budget'],
             visibility=args['visibility'],
             goals=args['goals'],
-            sponsor_id=args['sponsor_id']
+            sponsor_id=args['sponsor_id'],
+            flagged=args['flagged']
         )
         db.session.add(campaign)
-        # db.session.commit()
-        # return campaign_schema.dump(campaign), 201
+
 
         try:
             db.session.commit()
@@ -146,7 +150,7 @@ class CampaignResource(Resource):
             db.session.rollback()
             return {'message': str(e)}, 500
 
-        # return {'message': 'Campaign created successfully'}, 201
+        
     
     @marshal_with(campaign_fields)
     def put(self, campaign_id):
@@ -172,6 +176,7 @@ class CampaignResource(Resource):
         campaign.budget = data['budget']
         campaign.visibility = data['visibility']
         campaign.goals = data['goals']
+        campaign.flagged = data['flagged']
 
         try:
             db.session.commit()
@@ -183,7 +188,7 @@ class CampaignResource(Resource):
 
 
     def delete(self, campaign_id):
-        print('delete api called!!!')
+        # print('delete api called!!!')
         campaign = Campaign.query.get(campaign_id)
         
         if campaign:
@@ -204,7 +209,7 @@ api.add_resource(CampaignResource, '/campaign/<int:campaign_id>', '/campaigns')
 # -----------------------------
 
 
-# Define fields for marshalling AdRequests
+# Fields for marshalling AdRequests
 ad_request_fields = {
     'id': fields.Integer,
     'campaign_id': fields.Integer,

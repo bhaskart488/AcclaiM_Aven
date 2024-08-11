@@ -6,7 +6,25 @@ from maven import db, bcrypt
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
+
 class User(db.Model, UserMixin):
+    """
+    Represents a user in the system.
+    Attributes:
+        id (int): The unique identifier of the user.
+        username (str): The username of the user.
+        password_hash (str): The hashed password of the user.
+        email (str): The email address of the user.
+        role (str): The role of the user. Possible values are 'admin', 'sponsor', 'influencer'.
+        flagged (bool): Indicates if the user is flagged.
+        influencer (Influencer): The associated influencer profile.
+        sponsor (Sponsor): The associated sponsor profile.
+    Methods:
+        set_password(password): Sets the password for the user.
+        check_password(password): Checks if the provided password matches the user's password.
+        unread_notifications_count: Returns the count of unread notifications for the user.
+    """
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
@@ -29,6 +47,27 @@ class User(db.Model, UserMixin):
 
 
 class Influencer(db.Model):
+    """
+    Represents an influencer in the system.
+    Attributes:
+        id (int): The unique identifier of the influencer.
+        user_id (int): The foreign key referencing the associated user.
+        full_name (str): The full name of the influencer.
+        email (str): The email address of the influencer.
+        phone (str): The phone number of the influencer.
+        mobile (str): The mobile number of the influencer.
+        address (str): The address of the influencer.
+        category (str): The category of the influencer.
+        niche (str): The niche of the influencer.
+        profile_picture (str): The filename of the influencer's profile picture.
+        twitter_handle (str): The Twitter handle of the influencer.
+        twitter_followers (int): The number of Twitter followers of the influencer.
+        instagram_handle (str): The Instagram handle of the influencer.
+        instagram_followers (int): The number of Instagram followers of the influencer.
+        facebook_handle (str): The Facebook handle of the influencer.
+        facebook_followers (int): The number of Facebook followers of the influencer.
+    """
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
     full_name = db.Column(db.String(100), nullable=False)
@@ -51,6 +90,21 @@ class Influencer(db.Model):
 
 
 class Sponsor(db.Model):
+    """
+    Represents a sponsor in the system.
+    Attributes:
+        id (int): The unique identifier of the sponsor.
+        user_id (int): The foreign key referencing the associated user.
+        full_name (str): The full name of the sponsor.
+        email (str): The email address of the sponsor.
+        phone (str): The phone number of the sponsor.
+        mobile (str): The mobile number of the sponsor.
+        address (str): The address of the sponsor.
+        industry (str): The industry of the sponsor.
+        profile_picture (str): The filename of the sponsor's profile picture.
+        website (str): The website of the sponsor.
+        budget (int): The budget of the sponsor.
+    """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
     full_name = db.Column(db.String(100), nullable=False)
@@ -68,6 +122,24 @@ class Sponsor(db.Model):
 
 
 class Campaign(db.Model):
+    """
+    Represents a campaign in the system.
+    Attributes:
+        id (int): The unique identifier of the campaign.
+        name (str): The name of the campaign.
+        description (str): The description of the campaign.
+        start_date (datetime.date): The start date of the campaign.
+        end_date (datetime.date): The end date of the campaign.
+        budget (int): The budget of the campaign.
+        visibility (str): The visibility of the campaign. Possible values are 'public' or 'private'.
+        goals (str): The goals of the campaign.
+        flagged (bool): Indicates if the campaign is flagged.
+        sponsor_id (int): The foreign key referencing the associated sponsor.
+        sponsor (Sponsor): The associated sponsor.
+        ad_requests (list[AdRequest]): The list of ad requests associated with the campaign.
+    Methods:
+        campaign_progress(): Returns the progress of the campaign.
+    """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -95,6 +167,23 @@ class Campaign(db.Model):
 
 
 class AdRequest(db.Model):
+    """
+    Represents an ad request in the system.
+    Attributes:
+        id (int): The unique identifier of the ad request.
+        campaign_id (int): The foreign key referencing the associated campaign.
+        influencer_id (int): The foreign key referencing the associated influencer or user.
+        messages (str): The messages related to the ad request.
+        requirements (str): The requirements of the ad request.
+        status (str): The status of the ad request. Possible values are 'Pending', 'Accepted', 'Rejected'.
+        offer_amount (float): The offer amount of the ad request.
+        created_at (datetime.datetime): The creation timestamp of the ad request.
+        updated_at (datetime.datetime): The last update timestamp of the ad request.
+        completion_status (str): The completion status of the ad request.
+    Methods:
+        __repr__(): Returns a string representation of the ad request.
+    """
+
     id = db.Column(db.Integer, primary_key=True)
     campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'), nullable=False)
     # if request created when logged in user is sponsor, influencer id will be selected from dropdown as the names of influencers
@@ -115,8 +204,8 @@ class AdRequest(db.Model):
 
 
 class CampaignSchema(SQLAlchemyAutoSchema):
-    start_date = fields.DateTime(format='%Y-%m-%d')  # Ensure proper format
-    end_date = fields.DateTime(format='%Y-%m-%d')    # Ensure proper format
+    start_date = fields.DateTime(format='%Y-%m-%d')  
+    end_date = fields.DateTime(format='%Y-%m-%d')    
 
     class Meta:
         model = Campaign
@@ -128,8 +217,8 @@ campaigns_schema = CampaignSchema(many=True)
 
 
 class AdRequestSchema(SQLAlchemyAutoSchema):
-    created_at = fields.DateTime(format='%Y-%m-%d')  # Ensure proper format
-    updated_at = fields.DateTime(format='%Y-%m-%d')    # Ensure proper format
+    created_at = fields.DateTime(format='%Y-%m-%d')  
+    updated_at = fields.DateTime(format='%Y-%m-%d')    
 
     class Meta:
         model = AdRequest
@@ -140,9 +229,18 @@ adRequest_schema = AdRequestSchema()
 adRequests_schema = AdRequestSchema(many=True)
 
     
-
-
 class Notification(db.Model):
+    """
+    Represents a notification in the system.
+    Attributes:
+        id (int): The unique identifier of the notification.
+        user_id (int): The foreign key referencing the associated user.
+        message (str): The message of the notification.
+        timestamp (datetime.datetime): The timestamp of the notification.
+        is_read (bool): Indicates if the notification has been read.
+    Methods:
+        __repr__(): Returns a string representation of the notification.
+    """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     message = db.Column(db.String(255), nullable=False)
