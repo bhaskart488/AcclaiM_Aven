@@ -107,7 +107,7 @@
                     <p class="mb-1">{{ campaign.visibility }}</p>
                 </div>
                 <div class="btn-group" role="group" aria-label="Flag Actions">
-                    <a href="{{ url_for('admin.view_campaign', campaign_id=campaign.id) }}" class="btn btn-primart">View</a>
+                    <a href="{{ url_for('sponsor.campaign_visitor_profile', campaign_id=campaign.id) }}" class="btn btn-primart">View</a>
                     <a href="{{ url_for('admin.unflag_campaign', campaign_id=campaign.id) }}" class="btn btn-secondary">Unflag</a>
                     
                 </div>

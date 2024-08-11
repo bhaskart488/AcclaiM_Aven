@@ -159,7 +159,7 @@ def profile(user_id):
     # return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
     # Render the profile template with different context based on whether the current user is the owner
     if is_owner:
-        return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor)
+        return render_template('sponsor/profile.html', title='Profile', form=form, sponsor=sponsor, title='Profile')
     else:
         return render_template('sponsor/profile_visitor.html', title='Profile', sponsor=sponsor)
 #         return redirect(url_for('sponsor.profile_visitor', influencer_id=user_id))
@@ -389,7 +389,7 @@ def manage_ad_requests(campaign_id):
     ad_requests = AdRequest.query.join(Campaign).filter(Campaign.sponsor_id == current_user.id, Campaign.id == campaign_id).all()
     print(ad_requests)
     
-    return render_template('sponsor/ad_requests.html', ad_requests=ad_requests, title='Ad Requests', form=form, campaign_id=campaign_id)
+    return render_template('sponsor/ad_requests.html', ad_requests=ad_requests, title='Ad Requests', form=form, campaign_id=campaign_id, title='Ad Requests')
 
 # Ad Request Create Route
 
@@ -566,7 +566,7 @@ def all_ad_requests():
     # influencer = Influencer.query.filter_by(user_id=ad_request.influencer_id).first() changes made after the completion status column was added
 
     )
-    return render_template('sponsor/all_ad_requests.html', ad_requests=ad_requests, title='All Ad Requests')
+    return render_template('sponsor/all_ad_requests.html', ad_requests=ad_requests, title='All Ads')
 
 
 # Ad Request Payment Route
@@ -586,7 +586,7 @@ def make_payment(ad_request_id):
         flash('Payment successful', 'success')
         return redirect(url_for('sponsor.all_ad_requests'))
     
-    return render_template('sponsor/payment.html', title='Make Payment', form=form, ad_request_id=ad_request_id)
+    return render_template('sponsor/payment.html', title='Payment', form=form, ad_request_id=ad_request_id)
 
 
 # ----------------------
@@ -635,7 +635,7 @@ def search_influencers():
         # influencers = query.all()
         influencers = query.order_by((Influencer.instagram_followers + Influencer.twitter_followers).desc()).all()
 
-    return render_template('sponsor/search_results.html', form=form, influencers=influencers)
+    return render_template('sponsor/search_results.html', form=form, influencers=influencers, title='Search')
 
 
 # analytics routes
@@ -695,4 +695,4 @@ def sponsor_analytics():
         'campaign_budgets': list(campaign_budgets)
     }
 
-    return render_template('sponsor/analytics.html', data=data)
+    return render_template('sponsor/analytics.html', data=data, title='Analytics')

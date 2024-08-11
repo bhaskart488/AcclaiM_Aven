@@ -117,7 +117,7 @@ def search_campaigns():
             query = query.filter(Sponsor.full_name.ilike(f'%{sponsor_name}%'))
         campaigns = query.add_columns(Sponsor.full_name, Sponsor.website).all()
 
-    return render_template('admin/search_campaigns.html', form=form, campaigns=campaigns, industry=industry, budget=budget, sponsor_name=sponsor_name)
+    return render_template('admin/search_campaigns.html', form=form, campaigns=campaigns, industry=industry, budget=budget, sponsor_name=sponsor_name, title='Campaigns')
 
 
 
@@ -152,7 +152,7 @@ def search_users():
 
         users = query.all()
 
-    return render_template('admin/search_users.html', form=form, users=users)
+    return render_template('admin/search_users.html', form=form, users=users, title='Users')
 
 
 @admin.route('/user/<int:user_id>', methods=['GET'])
@@ -229,4 +229,4 @@ def admin_analytics():
         }
     }
 
-    return render_template('admin/analytics.html', data=data)
+    return render_template('admin/analytics.html', data=data, title='Analytics')

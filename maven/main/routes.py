@@ -22,6 +22,6 @@ def contacts():
 @login_required
 def notifications():    
     notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
-    return render_template('main/notifications.html', notifications=notifications)
+    return render_template('main/notifications.html', notifications=notifications, title='Notifications')
     # return render_template('main/notifications.html', title='Contacts')
 

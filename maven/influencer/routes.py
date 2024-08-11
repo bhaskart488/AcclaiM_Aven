@@ -9,10 +9,12 @@ from werkzeug.utils import secure_filename
 
 influencer = Blueprint('influencer', __name__)
 
+
+
 @influencer.route('/influencer-dashboard')
 @login_required
 def dashboard():
-    return render_template('influencer/dashboard.html')
+    return render_template('influencer/dashboard.html', title='Home')
 
 
 @influencer.route('/profile/<int:user_id>/delete', methods=['POST'])
@@ -169,7 +171,7 @@ def view_requests():
     campaign_ids = [ad_request.campaign_id for ad_request in ad_requests]
     campaigns = Campaign.query.filter(Campaign.id.in_(campaign_ids)).all()
 
-    return render_template('influencer/view_requests.html', ad_requests=ad_requests, campaigns=campaigns)
+    return render_template('influencer/view_requests.html', ad_requests=ad_requests, campaigns=campaigns, title='Requests')
 
 
 
@@ -252,7 +254,7 @@ def negotiate_ad_request(ad_request_id):
     else:
         form.offer_amount.data = ad_request.offer_amount  # Prefill the offer_amount data
         form.messages.data = ad_request.messages  # Prefill the messages data
-    return render_template('influencer/negotiate.html', form=form, ad_request=ad_request)
+    return render_template('influencer/negotiate.html', form=form, ad_request=ad_request, title='Negotiate')
 
 
 @influencer.route('/ad_request/<int:ad_request_id>')
@@ -268,7 +270,7 @@ def view_ad_request(ad_request_id):
     form = UpdateCompletionStatusForm()
     form.completion_status.data = ad_request.completion_status  # Prepopulate the completion status field
 
-    return render_template('influencer/view_ad_request.html', ad_request=ad_request, campaign=campaign, influencer=influencer, form=form)
+    return render_template('influencer/view_ad_request.html', ad_request=ad_request, campaign=campaign, influencer=influencer, form=form, title='Request')
 
 
 @influencer.route('/influencer/ad_request/<int:ad_request_id>/update_status', methods=['POST'])
@@ -302,7 +304,7 @@ def update_completion_status(ad_request_id):
 @influencer.route('/notifications')
 def view_notifications():
     notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
-    return render_template('main/notifications.html', notifications=notifications)
+    return render_template('main/notifications.html', notifications=notifications, title='Notifications')
 
 
 @influencer.route('/notifications/read/<int:notification_id>', methods=['POST'])
@@ -356,9 +358,7 @@ def search_campaigns():
         # campaigns = query.add_columns(Sponsor.full_name, Sponsor.website).all()
         campaigns = query.add_columns(Sponsor.full_name, Sponsor.website).order_by(Campaign.budget.desc()).all()
     
-    return render_template('influencer/search_results.html', form=form, campaigns=campaigns, industry=industry, budget=budget, sponsor_name=sponsor_name)
-
-# edit the user_id, sponsor_id mismatch.
+    return render_template('influencer/search_results.html', form=form, campaigns=campaigns, industry=industry, budget=budget, sponsor_name=sponsor_name, title='Search')
 
 
 # analytics
@@ -414,4 +414,4 @@ def influencer_analytics():
         'total_earnings': total_earnings
     }
 
-    return render_template('influencer/analytics.html', data=data)
+    return render_template('influencer/analytics.html', data=data, title='Analytics')
