@@ -1,0 +1,338 @@
+openapi: 3.0.0
+info:
+  title: Influencer Engagement and Sponsorship Coordination API
+  version: 1.0.0
+  description: API for managing users, campaigns, and ad requests.
+
+paths:
+  /register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+              required:
+                - username
+                - email
+                - password
+                - role
+      responses:
+        '201':
+          description: User created
+        '400':
+          description: Email already registered
+
+  /login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: User logged in
+        '401':
+          description: Invalid credentials
+
+  /campaigns:
+    get:
+      summary: Get all campaigns
+      responses:
+        '200':
+          description: List of campaigns
+
+    post:
+      summary: Create a new campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+                budget:
+                  type: number
+                visibility:
+                  type: string
+                goals:
+                  type: string
+                sponsor_id:
+                  type: integer
+              required:
+                - name
+                - description
+                - start_date
+                - end_date
+                - budget
+                - visibility
+                - goals
+                - sponsor_id
+      responses:
+        '201':
+          description: Campaign created
+        '400':
+          description: Invalid input
+
+  /campaign/{campaign_id}:
+    get:
+      summary: Get a campaign by ID
+      parameters:
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign details
+        '404':
+          description: Campaign not found
+
+    put:
+      summary: Update a campaign by ID
+      parameters:
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+                budget:
+                  type: number
+                visibility:
+                  type: string
+                goals:
+                  type: string
+      responses:
+        '200':
+          description: Campaign updated
+        '404':
+          description: Campaign not found
+
+    delete:
+      summary: Delete a campaign by ID
+      parameters:
+        - name: campaign_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign deleted
+        '404':
+          description: Campaign not found
+
+  /ad_requests:
+    get:
+      summary: Get all ad requests
+      responses:
+        '200':
+          description: List of ad requests
+
+    post:
+      summary: Create a new ad request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaign_id:
+                  type: integer
+                influencer_id:
+                  type: integer
+                messages:
+                  type: string
+                requirements:
+                  type: string
+                status:
+                  type: string
+                offer_amount:
+                  type: number
+              required:
+                - campaign_id
+                - influencer_id
+                - messages
+                - requirements
+                - status
+                - offer_amount
+      responses:
+        '201':
+          description: Ad request created
+        '400':
+          description: Invalid input
+
+  /ad_request/{ad_request_id}:
+    get:
+      summary: Get an ad request by ID
+      parameters:
+        - name: ad_request_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ad request details
+        '404':
+          description: Ad request not found
+
+    put:
+      summary: Update an ad request by ID
+      parameters:
+        - name: ad_request_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaign_id:
+                  type: integer
+                influencer_id:
+                  type: integer
+                messages:
+                  type: string
+                requirements:
+                  type: string
+                status:
+                  type: string
+                offer_amount:
+                  type: number
+      responses:
+        '200':
+          description: Ad request updated
+        '404':
+          description: Ad request not found
+
+    delete:
+      summary: Delete an ad request by ID
+      parameters:
+        - name: ad_request_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ad request deleted
+        '404':
+          description: Ad request not found
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        budget:
+          type: number
+        visibility:
+          type: string
+        goals:
+          type: string
+        sponsor_id:
+          type: integer
+
+    AdRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        campaign_id:
+          type: integer
+        influencer_id:
+          type: integer
+        messages:
+          type: string
+        requirements:
+          type: string
+        status:
+          type: string
+        offer_amount:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
