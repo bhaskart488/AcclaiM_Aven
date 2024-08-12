@@ -496,18 +496,18 @@ def edit_ad_request(ad_request_id):
             influencer = Influencer.query.filter_by(id=influencer_id).first()
 
             #debug prints
-            # print('details influencer: ', influencer, influencer_id, influencer.user_id, influencer.id)
+            print('details influencer: ', influencer, influencer_id)
 
             campaign_name = Campaign.query.get(ad_request["campaign_id"]).name
             sponsor = Sponsor.query.filter(Sponsor.user_id == current_user.id).first()
             sponsor_name = sponsor.full_name if sponsor else None
 
 
-            notification = Notification(
-                user_id=influencer.user_id,
-                message=f'Your ad request for campaign {campaign_name} has been updated by {sponsor_name}.'
-            )
-            db.session.add(notification)
+            # notification = Notification(
+            #     user_id=influencer.user_id,
+            #     message=f'Your ad request for campaign {campaign_name} has been updated by {sponsor_name}.'
+            # )
+            # db.session.add(notification)
             db.session.commit()
 
             return redirect(url_for('sponsor.manage_ad_requests', campaign_id=ad_request['campaign_id']))
@@ -596,8 +596,8 @@ def make_payment(ad_request_id):
     form = PaymentForm()
     if form.validate_on_submit():
         # Dummy payment processing logic
-        payment_amount = form.amount.data
-        payment_method = form.payment_method.data
+        # payment_amount = form.amount.data
+        # payment_method = form.payment_method.data
         # Process the payment using the specified payment method and amount
         flash('Payment successful', 'success')
         return redirect(url_for('sponsor.all_ad_requests'))
