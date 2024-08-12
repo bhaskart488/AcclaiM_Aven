@@ -93,6 +93,14 @@
                 data: {{ data.campaign_progress|map(attribute=1)|list|tojson }},
                 backgroundColor: '#FF6384'
             }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
         }
     });
 

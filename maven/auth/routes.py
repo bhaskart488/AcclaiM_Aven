@@ -119,7 +119,10 @@ def login():
                 return redirect(url_for('sponsor.dashboard'))
             elif user.role == 'influencer':
                 return redirect(url_for('influencer.dashboard'))
+        elif response.status_code == 404: 
+            flash('Please signup first.', 'danger')
         else:
+            
             flash(response.json().get('message', 'An error occurred'), 'danger')
     return render_template('auth/login.html', form=form, title='Log In')
 

@@ -142,6 +142,11 @@ def profile(user_id):
             picture_file.save(os.path.join('maven/static/profile_pics', filename))
             sponsor.profile_picture = filename
 
+        # Update the user's email
+        user = User.query.get_or_404(current_user.id)
+        user.email = sponsor.email
+
+
         db.session.commit()
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('sponsor.profile', user_id=user_id))
@@ -309,6 +314,7 @@ def edit_campaign(campaign_id):
             'budget': form.budget.data,
             'visibility': form.visibility.data,
             'goals': form.goals.data,
+            'flagged': campaign.get('flagged', False),
             'sponsor_id': current_user.id
         }
         response = requests.put(f'{API_URL}/campaign/{campaign_id}', json=data)
@@ -406,6 +412,13 @@ def create_ad_request(campaign_id):
     form = AdRequestForm()
     sponsor_id = current_user.id
 
+    #flagged
+    campaign = Campaign.query.get_or_404(campaign_id)
+
+    if campaign.flagged:
+        flash('This campaign has been flagged and cannot create ad requests.', 'danger')
+        return redirect(url_for('sponsor.dashboard'))
+
 
     if form.validate_on_submit():
         data = {
@@ -480,15 +493,15 @@ def edit_ad_request(ad_request_id):
             form.populate_obj(ad_request_ins)
             # Send notification to the influencer
             influencer_id = ad_request_ins.influencer_id
-            influencer = Influencer.query.filter_by(user_id=influencer_id).first()
+            influencer = Influencer.query.filter_by(id=influencer_id).first()
+
             #debug prints
-            print('details influencer: ', influencer, influencer_id)
+            # print('details influencer: ', influencer, influencer_id, influencer.user_id, influencer.id)
 
             campaign_name = Campaign.query.get(ad_request["campaign_id"]).name
             sponsor = Sponsor.query.filter(Sponsor.user_id == current_user.id).first()
             sponsor_name = sponsor.full_name if sponsor else None
 
-            print(influencer_id, influencer )
 
             notification = Notification(
                 user_id=influencer.user_id,
@@ -583,13 +596,9 @@ def make_payment(ad_request_id):
     form = PaymentForm()
     if form.validate_on_submit():
         # Dummy payment processing logic
-        # Dummy payment processing logic
-        # payment_amount = form.amount.data
-        # payment_method = form.payment_method.data
+        payment_amount = form.amount.data
+        payment_method = form.payment_method.data
         # Process the payment using the specified payment method and amount
-        # You can add your own logic here, such as connecting to a payment gateway or updating a database
-        # Once the payment is processed successfully, you can redirect the user to a success page
-        # If the payment fails, you can display an error message to the user
         flash('Payment successful', 'success')
         return redirect(url_for('sponsor.all_ad_requests'))
     

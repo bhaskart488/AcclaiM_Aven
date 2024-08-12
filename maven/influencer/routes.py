@@ -123,6 +123,10 @@ def profile(user_id):
             picture_file.save(picture_path)
             influencer.profile_picture = filename
 
+        # Update the user's email
+        user = User.query.get_or_404(current_user.id)
+        user.email = influencer.email
+
         db.session.commit()
         flash('Your profile has been updated!', 'success')
         return redirect(url_for('influencer.profile', user_id=user_id))
@@ -169,7 +173,9 @@ def view_requests():
     ad_requests = AdRequest.query.filter_by(influencer_id=Influencer.query.filter_by(user_id=current_user.id).first().user_id).all()
     ad_requests = AdRequest.query.filter_by(influencer_id=Influencer.query.filter_by(user_id=current_user.id).first().user_id).all()
     campaign_ids = [ad_request.campaign_id for ad_request in ad_requests]
-    campaigns = Campaign.query.filter(Campaign.id.in_(campaign_ids)).all()
+
+    #filter flagged    
+    campaigns = Campaign.query.filter(Campaign.id.in_(campaign_ids)).filter(Campaign.flagged == False).all()
 
     return render_template('influencer/view_requests.html', ad_requests=ad_requests, campaigns=campaigns, title='Requests')
 

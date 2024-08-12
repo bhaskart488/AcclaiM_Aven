@@ -49,6 +49,48 @@ def dashboard():
     )
 
 
+@admin.route("/admin/delete_user/<int:user_id>", methods=["POST"])
+@login_required
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    if user.role == 'sponsor':
+        sponsor = Sponsor.query.filter_by(user_id=user.id).first()
+        db.session.delete(sponsor)
+
+        campaigns = Campaign.query.filter_by(sponsor_id=user.id).all()
+        for campaign in campaigns:
+            # Handle related records in the ad_request table
+            ad_requests = AdRequest.query.filter_by(campaign_id=campaign.id).all()
+            for ad_request in ad_requests:
+                db.session.delete(ad_request)  
+            db.session.delete(campaign)
+    
+
+    if user.role == 'influencer':
+        influencer = Influencer.query.filter_by(user_id=user.id).first()
+        db.session.delete(influencer)
+
+    db.session.delete(user)
+    db.session.commit()
+    flash('User has been deleted.', 'success')
+    return redirect(url_for('admin.dashboard'))
+
+@admin.route("/admin/delete_campaign/<int:campaign_id>", methods=["POST"])
+@login_required
+def delete_campaign(campaign_id):
+    campaign = Campaign.query.get_or_404(campaign_id)
+    # Handle related records in the ad_request table
+    ad_requests = AdRequest.query.filter_by(campaign_id=campaign.id).all()
+    for ad_request in ad_requests:
+        db.session.delete(ad_request)  
+    
+    db.session.delete(campaign)
+    db.session.commit()
+    flash('Campaign has been deleted.', 'success')
+    return redirect(url_for('admin.dashboard'))
+
+
 
 @admin.route('/flag_user/<int:user_id>', methods=['POST', 'GET'])
 @login_required
@@ -104,9 +146,7 @@ def search_campaigns():
         sponsor_name = form.sponsor_name.data
         visibility = form.visibility.data
 
-        query = Campaign.query.join(Sponsor, Sponsor.user_id == Campaign.sponsor_id).filter(
-            Campaign.visibility == 'public'
-        )
+        query = Campaign.query.join(Sponsor, Sponsor.user_id == Campaign.sponsor_id)
         if visibility:
             query = query.filter(Campaign.visibility == visibility)
         if industry:

@@ -10,7 +10,7 @@ class UserSearchForm(FlaskForm):
 
 
 class CampaignSearchForm(FlaskForm):
-    visibility = SelectField('Visibility', choices=[('public', 'Public'), ('private', 'Private')])
+    visibility = SelectField('Visibility', choices=[('', 'Visibility'), ('public', 'Public'), ('private', 'Private')], validators=[Optional()])
     industry = SelectField('Industry', choices=[('', 'Select Industry'), ('technology', 'Technology'), ('fashion', 'Fashion'), ('food', 'Food'), ('travel', 'Travel'), ('fitness', 'Fitness'), ('music', 'Music'), ('art', 'Art'), ('health', 'Health'), ('beauty', 'Beauty'), ('sports', 'Sports')], validators=[Optional()])
     budget = DecimalField('Budget', places=2, validators=[Optional()])
     sponsor_name = StringField('Sponsor Name', validators=[Optional()])

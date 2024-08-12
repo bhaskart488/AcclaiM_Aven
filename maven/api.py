@@ -51,6 +51,9 @@ class Login(Resource):
         args = parser.parse_args()
 
         user = User.query.filter_by(email=args['email']).first()
+
+        if not user:
+            return {'message': 'Account does not exist'}, 404
         
         if user and user.check_password(args['password']):
             login_user(user)
