@@ -26,6 +26,10 @@ To run the application, install the requirements from  `requirements.txt`
 
 `py -m pip install -r requirements.txt`
 
+Run the application:
+
+`py run.py`
+
 To deactivate venv:
 
 `deactivate`
